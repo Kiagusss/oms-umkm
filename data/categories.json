@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "name": "Pempek Basah",
+    "slug": "pempek-basah",
+    "order": 1,
+    "status": "active"
+  },
+  {
+    "id": "2",
+    "name": "Pempek Goreng",
+    "slug": "pempek-goreng",
+    "order": 2,
+    "status": "active"
+  },
+  {
+    "id": "3",
+    "name": "Paket Kombinasi",
+    "slug": "paket-kombinasi",
+    "order": 3,
+    "status": "active"
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "title": "Pempek Asli Palembang",
+    "subtitle": "Lezat, Gurih, Dibuat Fresh Setiap Hari",
+    "buttonText": "Pesan Sekarang",
+    "buttonLink": "#produk",
+    "backgroundImage": "/images/hero-pempek.png",
+    "status": "active"
+  }
+]

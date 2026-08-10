@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "name": "Ratna Sari",
+    "photo": "/images/testimonials/person-1.jpg",
+    "rating": 5,
+    "comment": "Pempek paling enak yang pernah saya coba di luar Palembang. Rasanya autentik, cuko-nya pas, dan pengiriman cepat. Keluarga saya selalu repeat order setiap minggu.",
+    "status": "active"
+  },
+  {
+    "id": "2",
+    "name": "Budi Hartono",
+    "photo": "/images/testimonials/person-2.jpg",
+    "rating": 5,
+    "comment": "Kapal selam-nya besar dan isi telurnya penuh. Berbeda dengan pempek lain yang pelit isi. Kualitasnya konsisten setiap kali pesan.",
+    "status": "active"
+  }
+]

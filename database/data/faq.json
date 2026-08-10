@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "question": "Apakah pempek dibuat fresh setiap hari?",
+    "answer": "Ya, semua pempek kami dibuat fresh setiap hari menggunakan ikan tenggiri pilihan. Kami tidak menggunakan bahan beku untuk produksi harian.",
+    "order": 1,
+    "status": "active"
+  },
+  {
+    "id": "2",
+    "question": "Berapa lama pengiriman pesanan?",
+    "answer": "Untuk area Palembang, pengiriman dilakukan di hari yang sama (same day delivery). Untuk luar kota, kami menggunakan ekspedisi dengan estimasi 1-3 hari kerja dengan pengemasan khusus.",
+    "order": 2,
+    "status": "active"
+  },
+  {
+    "question": "Apakah pempek fresh dibuat setiap hari?",
+    "answer": "Ya, semua pempek kami dibuat fresh setiap hari menggunakan ikan tenggiri pilihan. Kami tidak menggunakan bahan beku untuk produksi harian.",
+    "order": 1,
+    "status": "active",
+    "id": "msacub3u9l40k"
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "1",
+    "title": "Sejarah Pempek: Kuliner Legendaris dari Palembang",
+    "slug": "sejarah-pempek-kuliner-legendaris-palembang",
+    "thumbnail": "/images/articles/sejarah-pempek.jpg",
+    "category": "Sejarah",
+    "content": "Pempek merupakan makanan khas Palembang yang telah ada sejak ratusan tahun lalu. Awalnya dikenal dengan kelesan...",
+    "author": "Tim Pempek Palembang",
+    "date": "2026-07-15",
+    "status": "published",
+    "createdAt": "2026-07-15T00:00:00.000Z",
+    "updatedAt": "2026-07-15T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "title": "Tips Menyimpan Pempek Frozen Agar Tetap Segar",
+    "slug": "tips-menyimpan-pempek-frozen",
+    "thumbnail": "/images/articles/tips-frozen.jpg",
+    "category": "Tips",
+    "content": "Pempek frozen bisa tahan lama jika disimpan dengan cara yang benar. Pastikan kemasan tertutup rapat kedap udara...",
+    "author": "Tim Pempek Palembang",
+    "date": "2026-07-20",
+    "status": "published",
+    "createdAt": "2026-07-20T00:00:00.000Z",
+    "updatedAt": "2026-07-20T00:00:00.000Z"
+  }
+]

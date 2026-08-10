@@ -1,0 +1,72 @@
+[
+  {
+    "id": "2",
+    "name": "Pempek Lenjer",
+    "slug": "pempek-lenjer",
+    "price": 8000,
+    "categoryId": "1",
+    "shortDescription": "Pempek panjang dengan tekstur kenyal sempurna.",
+    "fullDescription": "Pempek Lenjer memiliki bentuk panjang silindris dengan tekstur yang kenyal dan rasa ikan yang kuat. Cocok untuk dinikmati bersama cuko khas Palembang.",
+    "composition": "Ikan tenggiri, sagu, garam, penyedap alami",
+    "stock": 150,
+    "weight": 120,
+    "status": "active",
+    "isBestSeller": false,
+    "isFeatured": true,
+    "order": 2,
+    "thumbnail": "/images/products/lenjer.jpg",
+    "images": [
+      "/images/products/lenjer.jpg"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "name": "Pempek Adaan",
+    "slug": "pempek-adaan",
+    "price": 5000,
+    "categoryId": "1",
+    "shortDescription": "Pempek bulat goreng dengan aroma rempah.",
+    "fullDescription": "Pempek Adaan atau Pempek Bulat digoreng hingga kecokelatan dengan aroma rempah yang khas. Teksturnya renyah di luar dan lembut di dalam.",
+    "composition": "Ikan tenggiri, sagu, daun bawang, garam, penyedap alami",
+    "stock": 200,
+    "weight": 80,
+    "status": "active",
+    "isBestSeller": false,
+    "isFeatured": false,
+    "order": 3,
+    "thumbnail": "/images/products/adaan.jpg",
+    "images": [
+      "/images/products/adaan.jpg"
+    ],
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "name": "test",
+    "price": 222220,
+    "priceStrikethrough": 2000,
+    "categoryId": "1",
+    "shortDescription": "mantap",
+    "fullDescription": "test",
+    "composition": "ikan",
+    "stock": 10,
+    "weight": 100,
+    "status": "active",
+    "isBestSeller": true,
+    "isFeatured": false,
+    "order": 1,
+    "thumbnail": "https://i.pinimg.com/736x/e3/a2/a1/e3a2a1991ea8b523480f514f97aad736.jpg",
+    "images": [
+      "https://i.pinimg.com/736x/e3/a2/a1/e3a2a1991ea8b523480f514f97aad736.jpg"
+    ],
+    "seoTitle": "",
+    "seoDescription": "",
+    "metaKeywords": "",
+    "id": "msaacxk0qtpsk",
+    "slug": "test",
+    "createdAt": "2026-08-01T11:26:16.801Z",
+    "updatedAt": "2026-08-01T11:26:16.801Z"
+  }
+]
