@@ -1,9 +1,5 @@
 <?php
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/pos', [\App\Http\Controllers\PosController::class, 'index'])->name('pos');
-});
-
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\BannerController;
