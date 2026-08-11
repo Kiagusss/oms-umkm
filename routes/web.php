@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SeoController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TestimonialController;
+use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\ArticleController as PublicArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
@@ -45,6 +46,7 @@ Route::prefix('admin')->group(function () {
         Route::resource('faq', FaqController::class)->names('admin.faq');
         Route::resource('galeri', GalleryController::class)->names('admin.galeri');
         Route::resource('pesanan', OrderController::class)->names('admin.pesanan');
+        Route::resource('voucher', VoucherController::class)->names('admin.voucher');
         Route::get('pengaturan', [SettingController::class, 'edit'])->name('admin.pengaturan');
         Route::put('pengaturan', [SettingController::class, 'update'])->name('admin.pengaturan.update');
         Route::get('seo', [SeoController::class, 'edit'])->name('admin.seo');

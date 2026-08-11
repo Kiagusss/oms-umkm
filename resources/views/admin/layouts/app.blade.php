@@ -33,6 +33,7 @@
             ['label' => 'Kategori', 'route' => 'admin.kategori.index', 'icon' => 'M3 7h18M3 12h18M3 17h18', 'badge' => null],
             ['label' => 'Artikel', 'route' => 'admin.artikel.index', 'icon' => 'M4 5h16v14H4zM8 9h8M8 13h8', 'badge' => null],
             ['label' => 'Pesanan', 'route' => 'admin.pesanan.index', 'icon' => 'M6 3h12l2 18H4L6 3zm4 8h4', 'badge' => $pendingOrderCount > 0 ? $pendingOrderCount . '+' : null],
+            ['label' => 'Voucher', 'route' => 'admin.voucher.index', 'icon' => 'M20 12a8 8 0 11-16 0 8 8 0 0116 0zm-8-6v12m4-8H8', 'badge' => null],
         ];
 
         $menuGeneral = [
@@ -54,8 +55,9 @@
         $isBanner = str_starts_with($current, 'admin.banner');
         $isGaleri = str_starts_with($current, 'admin.galeri');
         $isPesanan = str_starts_with($current, 'admin.pesanan');
+        $isVoucher = str_starts_with($current, 'admin.voucher');
 
-        $isActiveFn = function($itemRoute) use ($current, $isProduk, $isPaket, $isKategori, $isArtikel, $isTestimoni, $isFaq, $isBanner, $isGaleri, $isPesanan) {
+        $isActiveFn = function($itemRoute) use ($current, $isProduk, $isPaket, $isKategori, $isArtikel, $isTestimoni, $isFaq, $isBanner, $isGaleri, $isPesanan, $isVoucher) {
             return $current === $itemRoute ||
                 ($isProduk && $itemRoute === 'admin.produk.index') ||
                 ($isPaket && $itemRoute === 'admin.paket.index') ||
@@ -65,7 +67,8 @@
                 ($isFaq && $itemRoute === 'admin.faq.index') ||
                 ($isBanner && $itemRoute === 'admin.banner.index') ||
                 ($isGaleri && $itemRoute === 'admin.galeri.index') ||
-                ($isPesanan && $itemRoute === 'admin.pesanan.index');
+                ($isPesanan && $itemRoute === 'admin.pesanan.index') ||
+                ($isVoucher && $itemRoute === 'admin.voucher.index');
         };
     @endphp
 
