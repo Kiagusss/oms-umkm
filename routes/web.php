@@ -46,6 +46,7 @@ Route::prefix('admin')->group(function () {
         Route::resource('faq', FaqController::class)->names('admin.faq');
         Route::resource('galeri', GalleryController::class)->names('admin.galeri');
         Route::resource('pesanan', OrderController::class)->names('admin.pesanan');
+        Route::get('pesanan/{pesanan}/struk', [OrderController::class, 'struk'])->name('admin.pesanan.struk');
         Route::resource('voucher', VoucherController::class)->names('admin.voucher');
         Route::get('pengaturan', [SettingController::class, 'edit'])->name('admin.pengaturan');
         Route::put('pengaturan', [SettingController::class, 'update'])->name('admin.pengaturan.update');

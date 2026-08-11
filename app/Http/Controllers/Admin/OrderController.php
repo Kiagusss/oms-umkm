@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Setting;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -77,6 +79,18 @@ class OrderController extends Controller
         $pesanan->delete();
 
         return redirect()->route('admin.pesanan.index')->with('success', 'Pesanan berhasil dihapus.');
+    }
+
+    public function struk(Order $pesanan)
+    {
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $items = is_array($pesanan->products) ? $pesanan->products : json_decode((string) $pesanan->products, true) ?? [];
+        $subtotal = (int) $pesanan->total();
+        $discount = (int) ($pesanan->discount ?? 0);
+
+        $pdf = Pdf::loadView('admin.pesanan.struk', compact('pesanan', 'settings', 'items', 'subtotal', 'discount'));
+
+        return $pdf->download('struk-' . $pesanan->id . '.pdf');
     }
 
     protected function validateOrder(Request $request, ?Order $order = null): array
