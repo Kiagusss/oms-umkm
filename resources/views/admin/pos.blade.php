@@ -77,7 +77,11 @@
                     Pesanan
                     <span x-show="cartCount > 0" class="ml-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700" x-text="cartCount"></span>
                 </h2>
-                <button @click="cart = []; clearVoucher()" x-show="cart.length > 0" class="text-xs font-semibold text-slate-400 transition hover:text-rose-500">Kosongkan</button>
+                <div class="flex items-center gap-2">
+                    <button @click="holdCart()" x-show="cart.length > 0"
+                        class="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-amber-200 transition hover:bg-amber-100">Tahan Keranjang</button>
+                    <button @click="cart = []; clearVoucher()" x-show="cart.length > 0" class="text-xs font-semibold text-slate-400 transition hover:text-rose-500">Kosongkan</button>
+                </div>
             </div>
 
             <div class="px-5 pt-4">
@@ -135,6 +139,30 @@
                 <p x-show="voucherError" class="mt-1 text-xs text-rose-500" x-text="voucherError"></p>
             </div>
 
+            {{-- Keranjang Ditahan --}}
+            <div class="border-t border-slate-100 px-5 py-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-extrabold text-slate-700">Keranjang Ditahan</h3>
+                    <span x-show="heldCarts.length > 0" class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-500" x-text="heldCarts.length"></span>
+                </div>
+                <p x-show="holdNotice" class="mt-1 text-xs font-medium text-amber-700" x-text="holdNotice"></p>
+                <template x-for="entry in heldCarts" :key="entry.id">
+                    <div class="mt-2 flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200">
+                        <div class="min-w-0">
+                            <p class="truncate text-xs font-bold text-slate-700" x-text="entry.label"></p>
+                            <p class="text-[11px] text-slate-400" x-text="heldCartSummary(entry)"></p>
+                        </div>
+                        <div class="flex shrink-0 gap-1">
+                            <button @click="resumeCart(entry.id)"
+                                class="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-[11px] font-bold text-white transition hover:bg-emerald-500">Lanjutkan</button>
+                            <button @click="deleteHeldCart(entry.id)"
+                                class="rounded-lg px-2 py-1.5 text-[11px] font-semibold text-slate-400 transition hover:bg-rose-50 hover:text-rose-500">Hapus</button>
+                        </div>
+                    </div>
+                </template>
+                <p x-show="heldCarts.length === 0" class="mt-1 text-xs text-slate-400">Belum ada keranjang ditahan.</p>
+            </div>
+
             <div class="border-t border-slate-100 px-5 py-4">
                 <div class="space-y-1.5 text-sm">
                     <div class="flex justify-between text-slate-500">
@@ -182,7 +210,12 @@ document.addEventListener('alpine:init', () => {
         voucherError: '',
         voucherLoading: false,
 
+        // Held carts (localStorage)
+        heldCarts: [],
+        holdNotice: '',
+
         init() {
+            this.loadHeldCarts();
             this.$watch('search', () => this.debouncedFilter());
             this.$watch('selectedCategory', () => this.debouncedFilter());
         },
@@ -260,6 +293,69 @@ document.addEventListener('alpine:init', () => {
             this.voucherCode = '';
             this.discount = 0;
             this.voucherError = '';
+        },
+
+        // ── Hold / resume keranjang (localStorage) ──
+        holdCart() {
+            if (this.cart.length === 0) return;
+            const entry = {
+                id: 'held-' + Date.now(),
+                label: this.customer.trim() ? this.customer.trim() : 'Pelanggan',
+                customer: this.customer,
+                items: JSON.parse(JSON.stringify(this.cart)),
+                voucherCode: this.voucherApplied ? this.voucherApplied.code : '',
+                savedAt: Date.now()
+            };
+            this.heldCarts.unshift(entry);
+            this.persistHeldCarts();
+            this.cart = [];
+            this.customer = '';
+            this.clearVoucher();
+            this.holdNotice = 'Keranjang ditahan. Lanjutkan dari daftar di bawah.';
+            setTimeout(() => { this.holdNotice = ''; }, 4000);
+        },
+
+        resumeCart(entryId) {
+            const idx = this.heldCarts.findIndex(e => e.id === entryId);
+            if (idx === -1) return;
+            const entry = this.heldCarts[idx];
+            this.heldCarts.splice(idx, 1);
+            this.persistHeldCarts();
+            this.cart = entry.items;
+            this.customer = entry.customer || '';
+            if (entry.voucherCode) {
+                this.voucherCode = entry.voucherCode;
+                this.applyVoucher();
+            }
+        },
+
+        deleteHeldCart(entryId) {
+            this.heldCarts = this.heldCarts.filter(e => e.id !== entryId);
+            this.persistHeldCarts();
+        },
+
+        persistHeldCarts() {
+            try {
+                localStorage.setItem('pempek_pos_held_carts', JSON.stringify(this.heldCarts));
+            } catch (err) {
+                this.holdNotice = 'Gagal menyimpan keranjang: penyimpanan perangkat penuh.';
+                setTimeout(() => { this.holdNotice = ''; }, 4000);
+            }
+        },
+
+        loadHeldCarts() {
+            try {
+                const raw = localStorage.getItem('pempek_pos_held_carts');
+                this.heldCarts = raw ? JSON.parse(raw) : [];
+            } catch (err) {
+                this.heldCarts = [];
+            }
+        },
+
+        heldCartSummary(entry) {
+            const count = entry.items.reduce((sum, item) => sum + item.quantity, 0);
+            const time = new Date(entry.savedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            return entry.label + ' — ' + count + ' item, ' + time;
         },
 
         async processTransaction() {
