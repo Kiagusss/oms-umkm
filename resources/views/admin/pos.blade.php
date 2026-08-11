@@ -11,6 +11,9 @@
                 <h1 class="text-xl font-extrabold tracking-tight text-slate-800">Kasir</h1>
                 <p class="text-xs font-medium text-slate-400">{{ now()->translatedFormat('l, d F Y') }}</p>
             </div>
+            <div x-show="happyHourActive" class="flex items-center gap-2 rounded-xl bg-amber-100 px-3 py-2 ring-1 ring-amber-300">
+                <span class="text-xs font-extrabold uppercase tracking-wide text-amber-800">Happy Hour -<span x-text="happyHourPercent"></span>%</span>
+            </div>
             <div class="relative sm:w-72">
                 <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -58,7 +61,17 @@
                     <h3 class="truncate text-sm font-bold text-slate-800">{{ $product->name }}</h3>
                     <p class="mt-0.5 text-xs text-slate-400">Stok: {{ $product->stock }}</p>
                     <div class="mt-2 flex items-center justify-between gap-1">
-                        <span class="text-sm font-extrabold text-emerald-600">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                        <div class="flex items-baseline gap-1.5">
+                            <span x-show="happyHourActive" class="text-[10px] font-bold text-amber-700">-{{ $happyHourPercent }}%</span>
+                            <span class="text-sm font-extrabold text-emerald-600">
+                                @if($happyHourActive)
+                                    <span class="text-xs font-semibold text-slate-400 line-through">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                    <span class="ml-1">Rp {{ number_format($happyHourDiscounts[$product->id], 0, ',', '.') }}</span>
+                                @else
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                @endif
+                            </span>
+                        </div>
                         <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 transition group-hover:bg-emerald-600 group-hover:text-white">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                         </span>
@@ -203,6 +216,11 @@ document.addEventListener('alpine:init', () => {
         cart: [],
         busy: false,
 
+        // Happy hour state (server-side source of truth)
+        happyHourActive: {{ $happyHourActive ? 'true' : 'false' }},
+        happyHourPercent: {{ $happyHourPercent }},
+        happyHourDiscounts: @json($happyHourDiscounts),
+
         // Voucher state
         voucherCode: '',
         voucherApplied: null,
@@ -227,10 +245,13 @@ document.addEventListener('alpine:init', () => {
             if (existing) {
                 this.updateQty(productId, 1);
             } else {
+                const price = this.happyHourActive
+                    ? (this.happyHourDiscounts[product.id] ?? product.price)
+                    : product.price;
                 this.cart.push({
                     productId: product.id,
                     productName: product.name,
-                    price: product.price,
+                    price: price,
                     quantity: 1,
                     thumbnail: product.thumbnail,
                     stock: product.stock

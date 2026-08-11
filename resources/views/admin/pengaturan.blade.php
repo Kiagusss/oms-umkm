@@ -76,6 +76,33 @@
             <input type="text" name="google_maps_embed" value="{{ $settings['google_maps_embed'] ?? '' }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
         </div>
 
+        <div class="border-t border-[var(--color-paper-3)] pt-6">
+            <h2 class="text-lg font-bold text-[var(--color-ink)]">HAPPY HOUR</h2>
+            <p class="mt-1 text-sm text-[var(--color-ink-3)]">Diskon otomatis per jam di kasir POS. Harga efektif dihitung server-side saat checkout.</p>
+
+            <div class="mt-4 grid gap-6 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Aktifkan Happy Hour</label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="happy_hour_enabled" value="on" @checked(($settings['happy_hour_enabled'] ?? '0') === '1') class="h-4 w-4 rounded border-[var(--color-paper-3)] text-[var(--color-accent)]">
+                        <span class="text-sm text-[var(--color-ink-2)]">Aktif</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Diskon (%)</label>
+                    <input type="number" name="happy_hour_discount_percent" min="1" max="100" value="{{ $settings['happy_hour_discount_percent'] ?? '' }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Jam Mulai</label>
+                    <input type="time" name="happy_hour_start" value="{{ $settings['happy_hour_start'] ?? '' }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Jam Selesai</label>
+                    <input type="time" name="happy_hour_end" value="{{ $settings['happy_hour_end'] ?? '' }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+                </div>
+            </div>
+        </div>
+
         <div class="flex justify-end border-t border-[var(--color-paper-3)] pt-6">
             <button type="submit" class="rounded-[var(--radius-xl)] bg-[var(--color-accent)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-accent-hover)]">
                 Simpan Pengaturan

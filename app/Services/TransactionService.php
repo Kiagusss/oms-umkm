@@ -12,6 +12,10 @@ class TransactionService
     // ponytail: tax rate hardcoded 0%; move to settings table when PPN applies
     private const TAX_RATE = 0;
 
+    public function __construct(private HappyHourService $happyHour)
+    {
+    }
+
     /**
      * @param array $items [['id' => int, 'quantity' => int], ...]
      * @return array{subtotal: int, tax: int, total: int, lineItems: array}
@@ -33,13 +37,17 @@ class TransactionService
                 throw new \InvalidArgumentException("Stok {$product->name} tidak mencukupi (tersedia: {$product->stock})");
             }
 
-            $lineTotal = $product->price * $line['quantity'];
+            // Happy hour: harga efektif dihitung server-side saat request.
+            $discountPercent = $this->happyHour->discountPercent();
+            $effectivePrice  = $this->happyHour->discountedPrice((int) $product->price, $discountPercent);
+
+            $lineTotal = $effectivePrice * $line['quantity'];
             $subtotal += $lineTotal;
 
             $lineItems[] = [
                 'productId'   => $product->id,
                 'productName' => $product->name,
-                'price'       => $product->price,
+                'price'       => $effectivePrice,
                 'quantity'    => $line['quantity'],
                 'thumbnail'   => $product->thumbnail,
             ];

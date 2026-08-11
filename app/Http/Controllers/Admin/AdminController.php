@@ -99,7 +99,14 @@ class AdminController extends Controller
         $categories = Category::where('status', 'active')->orderBy('ord')->get();
         $packages = Package::where('status', 'active')->orderBy('ord')->get();
 
-        return view('admin.pos', compact('products', 'categories', 'packages'));
+        $happyHour = app(\App\Services\HappyHourService::class);
+
+        return view('admin.pos', compact('products', 'categories', 'packages'))
+            ->with('happyHourActive', $happyHour->isActive())
+            ->with('happyHourPercent', $happyHour->discountPercent())
+            ->with('happyHourDiscounts', $products->mapWithKeys(fn ($p) => [
+                $p->id => $happyHour->discountedPrice((int) $p->price, $happyHour->discountPercent()),
+            ]));
     }
 
     /**
@@ -107,9 +114,26 @@ class AdminController extends Controller
      */
     public function posProducts()
     {
+        $happyHour = app(\App\Services\HappyHourService::class);
+        $percent = $happyHour->discountPercent();
+        $active = $percent > 0;
+
+        $products = Product::where('status', 'active')->orderBy('ord')->get(['id', 'name', 'price', 'stock', 'thumbnail', 'category_id'])
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'price' => (int) $p->price,
+                'discounted_price' => $happyHour->discountedPrice((int) $p->price, $percent),
+                'stock' => $p->stock,
+                'thumbnail' => $p->thumbnail,
+                'category_id' => $p->category_id,
+            ]);
+
         return response()->json([
-            'products' => Product::where('status', 'active')->orderBy('ord')->get(['id', 'name', 'price', 'stock', 'thumbnail', 'category_id']),
+            'products' => $products,
             'categories' => Category::where('status', 'active')->orderBy('ord')->get(['id', 'name']),
+            'happy_hour_active' => $active,
+            'happy_hour_percent' => $percent,
         ]);
     }
 
