@@ -13,16 +13,17 @@ use App\Models\Order;
 use App\Models\Package;
 use App\Models\Product;
 use App\Models\Testimonial;
+use App\Services\SalesReportService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function dashboard(Request $request)
+    public function dashboard(Request $request, SalesReportService $report)
     {
         // Filter periode: today, month, year (default: today)
         $filter = $request->get('filter', 'today');
-        
+
         // Base query untuk filter tanggal
         $dateQuery = function ($query) use ($filter) {
             if ($filter === 'today') {
@@ -35,15 +36,18 @@ class AdminController extends Controller
             }
         };
 
-        // Hitung total pendapatan berdasarkan filter
+        // Orders dalam periode filter (termasuk cancelled untuk totalOrders)
         $ordersFiltered = Order::where(function ($q) use ($dateQuery) {
             $dateQuery($q);
         })->get();
-        
-        $totalRevenue = $ordersFiltered->sum(function ($order) {
-            $products = json_decode($order->products, true) ?? [];
-            return collect($products)->sum(fn($item) => ($item['price'] ?? 0) * ($item['quantity'] ?? 0));
-        });
+
+        // Pendapatan: subtotal - diskon voucher, pesanan cancelled tidak dihitung
+        $totalRevenue    = $report->totalRevenue($ordersFiltered);
+        $filteredOrders  = $report->orderCount($ordersFiltered);
+        $filteredRevenue = $totalRevenue;
+        $totalDiscount   = $ordersFiltered
+            ->reject(fn ($order) => $order->status === 'cancelled')
+            ->sum(fn ($order) => (int) ($order->discount ?? 0));
 
         // Stats utama
         $stats = [
@@ -51,10 +55,11 @@ class AdminController extends Controller
             'totalOrders' => Order::count(),
             'totalPageViews' => \App\Models\PageView::count(),
             'totalRevenue' => $totalRevenue,
-            
+
             // Stats berdasarkan filter
-            'filteredOrders' => $ordersFiltered->count(),
-            'filteredRevenue' => $totalRevenue,
+            'filteredOrders' => $filteredOrders,
+            'filteredRevenue' => $filteredRevenue,
+            'filteredDiscount' => $totalDiscount,
             'filteredPageViews' => \App\Models\PageView::where(function ($q) use ($dateQuery) {
                 $dateQuery($q);
             })->count(),
@@ -65,21 +70,27 @@ class AdminController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get()
-            ->map(function ($order) {
-                $products = json_decode($order->products, true) ?? [];
-                $total = collect($products)->sum(fn($item) => ($item['price'] ?? 0) * ($item['quantity'] ?? 0));
+            ->map(function ($order) use ($report) {
                 return [
                     'id' => $order->id,
                     'name' => $order->name,
                     'whatsapp' => $order->whatsapp,
                     'date' => $order->date,
                     'status' => $order->status,
-                    'total' => $total,
+                    'total' => $report->orderRevenue($order),
                     'created_at' => $order->created_at,
                 ];
             });
 
-        return view('admin.dashboard', compact('stats', 'recentOrders', 'filter'));
+        // Laporan penjualan: tren 7 hari + produk terlaris + metode pembayaran
+        $dailyRevenue   = $report->dailyRevenue($ordersFiltered, 7);
+        $topProducts    = $report->topProducts($ordersFiltered, 5);
+        $paymentMethods = $report->paymentMethodBreakdown($ordersFiltered);
+
+        return view('admin.dashboard', compact(
+            'stats', 'recentOrders', 'filter',
+            'dailyRevenue', 'topProducts', 'paymentMethods'
+        ));
     }
 
     public function pos()

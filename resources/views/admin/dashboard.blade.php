@@ -96,8 +96,89 @@
             <p class="text-4xl font-extrabold tracking-tight text-[var(--color-ink)]">Rp{{ number_format($stats['filteredRevenue']) }}</p>
             <div class="mt-4 text-xs font-bold text-[var(--color-ink-3)] leading-normal">
                 Dari {{ $stats['filteredOrders'] }} pesanan
+                @if(($stats['filteredDiscount'] ?? 0) > 0)
+                    <span class="mt-1 block rounded-md bg-rose-50 px-2 py-0.5 text-[10px] text-rose-600 font-extrabold">
+                        Diskon: -Rp{{ number_format($stats['filteredDiscount']) }}
+                    </span>
+                @endif
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Laporan Penjualan: Tren 7 Hari + Produk Terlaris + Metode Pembayaran -->
+<div class="mt-8 grid gap-6 lg:grid-cols-3 animate-fade-up">
+    <!-- Tren Pendapatan 7 Hari -->
+    <div class="rounded-[24px] border border-[var(--color-paper-3)] bg-white p-6 shadow-sm lg:col-span-2">
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-[var(--color-ink)]">Tren Penjualan 7 Hari</h2>
+            <p class="mt-1 text-sm text-[var(--color-ink-3)]">Pendapatan per hari pada periode terpilih</p>
+        </div>
+        <div class="flex items-end gap-3">
+            @php $maxRevenue = max(1, collect($dailyRevenue)->max('revenue')); @endphp
+            @foreach($dailyRevenue as $day)
+                <div class="flex flex-1 flex-col items-center gap-2">
+                    <div class="relative flex w-full items-end justify-center" style="height: 160px;">
+                        <div class="group relative w-full max-w-[36px] rounded-t-lg bg-[var(--color-accent)] transition-all duration-300 hover:bg-[var(--color-accent-2)]"
+                             style="height: {{ max(4, round($day['revenue'] / $maxRevenue * 100)) }}%">
+                            <div class="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-ink)] px-2 py-1 text-[10px] font-bold text-white opacity-0 transition group-hover:opacity-100">
+                                Rp{{ number_format($day['revenue']) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[11px] font-bold text-[var(--color-ink-2)]">{{ $day['label'] }}</p>
+                        <p class="text-[10px] font-semibold text-[var(--color-ink-3)]">{{ $day['orders'] }} pesanan</p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Produk Terlaris -->
+    <div class="rounded-[24px] border border-[var(--color-paper-3)] bg-white p-6 shadow-sm">
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-[var(--color-ink)]">Produk Terlaris</h2>
+            <p class="mt-1 text-sm text-[var(--color-ink-3)]">Top 5 berdasarkan jumlah terjual</p>
+        </div>
+        <ul class="space-y-4">
+            @forelse($topProducts as $index => $item)
+                <li class="flex items-center gap-3">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-paper-2)] text-xs font-extrabold text-[var(--color-ink-2)]">
+                        {{ $index + 1 }}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-semibold text-[var(--color-ink)]">{{ $item['name'] }}</p>
+                        <p class="text-xs text-[var(--color-ink-3)]">{{ $item['quantity'] }} terjual · Rp{{ number_format($item['revenue']) }}</p>
+                    </div>
+                </li>
+            @empty
+                <li class="py-6 text-center text-sm text-[var(--color-ink-3)]">Belum ada penjualan.</li>
+            @endforelse
+        </ul>
+    </div>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-3 animate-fade-up">
+    <!-- Metode Pembayaran -->
+    <div class="rounded-[24px] border border-[var(--color-paper-3)] bg-white p-6 shadow-sm">
+        <div class="mb-6">
+            <h2 class="text-xl font-bold text-[var(--color-ink)]">Metode Pembayaran</h2>
+            <p class="mt-1 text-sm text-[var(--color-ink-3)]">Distribusi pesanan per metode</p>
+        </div>
+        <ul class="space-y-3">
+            @forelse($paymentMethods as $method)
+                <li class="flex items-center justify-between rounded-[var(--radius-lg)] bg-[var(--color-paper-2)] px-4 py-3">
+                    <div>
+                        <p class="text-sm font-bold text-[var(--color-ink)]">{{ $method['method'] }}</p>
+                        <p class="text-xs text-[var(--color-ink-3)]">{{ $method['orders'] }} pesanan</p>
+                    </div>
+                    <p class="text-sm font-extrabold tabular-nums text-[var(--color-accent)]">Rp{{ number_format($method['revenue']) }}</p>
+                </li>
+            @empty
+                <li class="py-6 text-center text-sm text-[var(--color-ink-3)]">Belum ada data.</li>
+            @endforelse
+        </ul>
     </div>
 </div>
 
