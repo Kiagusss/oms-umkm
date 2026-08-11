@@ -77,7 +77,7 @@
                     Pesanan
                     <span x-show="cartCount > 0" class="ml-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700" x-text="cartCount"></span>
                 </h2>
-                <button @click="cart = []" x-show="cart.length > 0" class="text-xs font-semibold text-slate-400 transition hover:text-rose-500">Kosongkan</button>
+                <button @click="cart = []; clearVoucher()" x-show="cart.length > 0" class="text-xs font-semibold text-slate-400 transition hover:text-rose-500">Kosongkan</button>
             </div>
 
             <div class="px-5 pt-4">
@@ -114,11 +114,36 @@
                 </div>
             </div>
 
+            {{-- Voucher Input --}}
+            <div class="px-5 pb-3" x-show="cart.length > 0">
+                <div class="flex gap-2" x-show="!voucherApplied">
+                    <input x-model="voucherCode" type="text" placeholder="Kode voucher"
+                        class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm uppercase outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                    <button @click="applyVoucher()" :disabled="voucherLoading || !voucherCode.trim()"
+                        class="shrink-0 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-500 disabled:opacity-40">
+                        <span x-show="!voucherLoading">Pakai</span>
+                        <span x-show="voucherLoading">…</span>
+                    </button>
+                </div>
+                <div x-show="voucherApplied" class="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2.5 ring-1 ring-emerald-200">
+                    <div class="text-sm">
+                        <span class="font-bold text-emerald-700" x-text="voucherApplied.code"></span>
+                        <span class="text-emerald-600" x-text="voucherApplied.type === 'percentage' ? voucherApplied.value + '%' : 'Rp ' + formatNumber(voucherApplied.value)"></span>
+                    </div>
+                    <button @click="clearVoucher()" class="text-xs font-semibold text-emerald-400 hover:text-rose-500">✕ Hapus</button>
+                </div>
+                <p x-show="voucherError" class="mt-1 text-xs text-rose-500" x-text="voucherError"></p>
+            </div>
+
             <div class="border-t border-slate-100 px-5 py-4">
                 <div class="space-y-1.5 text-sm">
                     <div class="flex justify-between text-slate-500">
                         <span>Subtotal</span>
                         <span class="font-semibold tabular-nums text-slate-700" x-text="'Rp ' + formatNumber(subtotal)"></span>
+                    </div>
+                    <div x-show="discount > 0" class="flex justify-between text-emerald-600">
+                        <span>Diskon</span>
+                        <span class="font-semibold tabular-nums" x-text="'- Rp ' + formatNumber(discount)"></span>
                     </div>
                     <div class="flex justify-between text-slate-500">
                         <span>Item</span>
@@ -149,6 +174,13 @@ document.addEventListener('alpine:init', () => {
         customer: '',
         cart: [],
         busy: false,
+
+        // Voucher state
+        voucherCode: '',
+        voucherApplied: null,
+        discount: 0,
+        voucherError: '',
+        voucherLoading: false,
 
         init() {
             this.$watch('search', () => this.debouncedFilter());
@@ -183,6 +215,51 @@ document.addEventListener('alpine:init', () => {
             } else {
                 this.cart[idx].quantity = newQty;
             }
+            // Re-validate voucher when cart changes
+            if (this.voucherApplied) {
+                this.applyVoucher();
+            }
+        },
+
+        async applyVoucher() {
+            this.voucherError = '';
+            this.voucherLoading = true;
+            try {
+                const response = await fetch('/api/voucher/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        code: this.voucherCode.trim(),
+                        total: this.subtotal
+                    })
+                });
+                const data = await response.json();
+                if (response.ok && data.ok) {
+                    this.voucherApplied = data.voucher;
+                    this.discount = data.discount;
+                } else {
+                    const msg = data.message || (data.errors?.code?.[0] || 'Voucher tidak valid');
+                    this.voucherError = msg;
+                    this.voucherApplied = null;
+                    this.discount = 0;
+                }
+            } catch (err) {
+                this.voucherError = 'Gagal memproses voucher';
+                this.voucherApplied = null;
+                this.discount = 0;
+            } finally {
+                this.voucherLoading = false;
+            }
+        },
+
+        clearVoucher() {
+            this.voucherApplied = null;
+            this.voucherCode = '';
+            this.discount = 0;
+            this.voucherError = '';
         },
 
         async processTransaction() {
@@ -193,7 +270,8 @@ document.addEventListener('alpine:init', () => {
                     customer_name: this.customer,
                     items: this.cart.map(item => ({ id: item.productId, quantity: item.quantity })),
                     payment_method: 'Tunai',
-                    cash_received: this.total
+                    cash_received: this.total,
+                    voucher_code: this.voucherApplied ? this.voucherApplied.code : null
                 };
                 const response = await fetch('/api/pos-checkout', {
                     method: 'POST',
@@ -205,8 +283,9 @@ document.addEventListener('alpine:init', () => {
                     alert('Transaksi berhasil: ' + data.order_id);
                     this.cart = [];
                     this.customer = '';
+                    this.clearVoucher();
                 } else {
-                    alert('Error: ' + (data.error || 'Transaksi gagal'));
+                    alert('Error: ' + (data.error || data.message || 'Transaksi gagal'));
                 }
             } catch (err) {
                 alert('Koneksi error: ' + err.message);
@@ -228,7 +307,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         get total() {
-            return this.subtotal;
+            return Math.max(0, this.subtotal - this.discount);
         },
 
         formatNumber(num) {

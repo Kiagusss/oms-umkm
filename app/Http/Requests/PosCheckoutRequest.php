@@ -23,6 +23,7 @@ class PosCheckoutRequest extends FormRequest
             'notes'             => 'nullable|string|max:500',
             'payment_method'    => 'required|in:Tunai,Transfer,QRIS',
             'cash_received'     => 'nullable|integer|min:0',
+            'voucher_code'      => 'nullable|string|max:50',
         ];
     }
 

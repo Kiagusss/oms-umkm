@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Voucher;
 use Illuminate\Support\Facades\DB;
 
 class TransactionService
@@ -62,7 +63,23 @@ class TransactionService
     {
         $calc = $this->calculate($validated['items']);
 
-        return DB::transaction(function () use ($validated, $calc) {
+        $voucher = null;
+        $discount = 0;
+
+        if (!empty($validated['voucher_code'])) {
+            $voucher = Voucher::where('code', $validated['voucher_code'])->first();
+            if (!$voucher) {
+                throw new \InvalidArgumentException('Kode voucher tidak valid');
+            }
+            $discount = $this->voucherDiscount($voucher, $calc['total']);
+            if ($discount === null) {
+                throw new \InvalidArgumentException('Voucher tidak berlaku');
+            }
+        }
+
+        $grandTotal = $calc['total'] - $discount;
+
+        return DB::transaction(function () use ($validated, $calc, $voucher, $discount, $grandTotal) {
             // Decrement stock with lock
             foreach ($validated['items'] as $line) {
                 $affected = Product::where('id', $line['id'])
@@ -79,7 +96,11 @@ class TransactionService
             $changeAmount  = null;
 
             if ($paymentMethod === 'Tunai' && $cashReceived !== null) {
-                $changeAmount = max(0, $cashReceived - $calc['total']);
+                $changeAmount = max(0, $cashReceived - $grandTotal);
+            }
+
+            if ($voucher) {
+                $voucher->increment('used_count');
             }
 
             return Order::create([
@@ -92,7 +113,31 @@ class TransactionService
                 'payment_method' => $paymentMethod,
                 'cash_received'  => $cashReceived,
                 'change_amount'  => $changeAmount,
+                'voucher_id'     => $voucher?->id,
+                'discount'       => $discount,
             ]);
         });
+    }
+
+    /**
+     * Calculate voucher discount, or null if voucher is not usable.
+     */
+    private function voucherDiscount(Voucher $voucher, int $total): ?int
+    {
+        $now = now();
+
+        if (!$voucher->is_active) return null;
+        if ($voucher->valid_from && $now->lt($voucher->valid_from)) return null;
+        if ($voucher->valid_until && $now->gt($voucher->valid_until)) return null;
+        if ($voucher->max_uses !== null && $voucher->used_count >= $voucher->max_uses) return null;
+        if ($voucher->min_order !== null && $total < $voucher->min_order) return null;
+
+        if ($voucher->type === 'percentage') {
+            $discount = (int) round($total * $voucher->value / 100);
+        } else {
+            $discount = (int) $voucher->value;
+        }
+
+        return min($discount, $total);
     }
 }

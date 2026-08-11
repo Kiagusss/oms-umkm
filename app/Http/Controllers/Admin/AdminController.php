@@ -113,13 +113,17 @@ class AdminController extends Controller
             return response()->json(['error' => $e->getMessage()], 422);
         }
 
+        $discount = (int) ($order->discount ?? 0);
+
         return response()->json([
             'ok'            => true,
             'order_id'      => $order->id,
-            'total'         => $order->total(),
+            'subtotal'      => $order->total(),
+            'total'         => $order->total() - $discount,
             'payment_method'=> $order->payment_method,
             'cash_received' => $order->cash_received,
             'change_amount' => $order->change_amount,
+            'discount'      => $discount,
         ]);
     }
 }
