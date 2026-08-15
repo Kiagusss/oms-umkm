@@ -16,8 +16,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Alias untuk route middleware
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
+        ]);
+
+        // Global middleware: jalan di SEMUA request web
+        $middleware->web(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+        $middleware->web(prepend: [
+            \App\Http\Middleware\ForceHttps::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
