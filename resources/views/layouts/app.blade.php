@@ -10,16 +10,33 @@
     <meta name="keywords" content="{{ $metaKeywords }}">
     @endif
     <meta name="robots" content="{{ $robots ?? 'index, follow' }}">
-    <link rel="canonical" href="{{ url()->current() }}">
-    <meta property="og:type" content="website">
+    <meta name="geo.region" content="ID-SS">
+    <meta name="geo.placename" content="Palembang">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="canonical" href="{{ $canonicalUrl ?? url()->current() }}">
+    <link rel="alternate" hreflang="id-ID" href="{{ $canonicalUrl ?? url()->current() }}">
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
     <meta property="og:locale" content="id_ID">
-    <meta property="og:site_name" content="Pempek Palembang">
+    <meta property="og:site_name" content="{{ $ogSiteName ?? 'Pempek Palembang' }}">
     <meta property="og:title" content="{{ $ogTitle ?? ($seoTitle ?? 'Pempek Palembang — Pempek Asli Palembang, Lezat & Fresh Setiap Hari') }}">
-    <meta property="og:description" content="{{ $seoDescription ?? 'Pempek asli Palembang dibuat fresh setiap hari dari ikan tenggiri pilihan dengan resep turun-temurun.' }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ asset('images/hero-pempek.png') }}">
+    <meta property="og:description" content="{{ $ogDescription ?? $seoDescription ?? 'Pempek asli Palembang dibuat fresh setiap hari dari ikan tenggiri pilihan dengan resep turun-temurun.' }}">
+    <meta property="og:url" content="{{ $canonicalUrl ?? url()->current() }}">
+    <meta property="og:image" content="{{ $ogImage ?? asset('images/hero-pempek.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle ?? ($seoTitle ?? 'Pempek Palembang — Pempek Asli Palembang, Lezat & Fresh Setiap Hari') }}">
+    <meta name="twitter:description" content="{{ $ogDescription ?? $seoDescription ?? 'Pempek asli Palembang dibuat fresh setiap hari dari ikan tenggiri pilihan dengan resep turun-temurun.' }}">
+    <meta name="twitter:image" content="{{ $ogImage ?? asset('images/hero-pempek.png') }}">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="preload" as="image" href="{{ $ogImage ?? asset('images/hero-pempek.png') }}" fetchpriority="high">
+    @if(!empty($googleVerification))
+    <meta name="google-site-verification" content="{{ $googleVerification }}">
+    @endif
+    @if(!empty($schemaJsonLd))
+    <script type="application/ld+json">{!! $schemaJsonLd !!}</script>
+    @endif
+    @stack('head')
 
     {{-- Fonts: Plus Jakarta Sans — CDN, tanpa build step --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

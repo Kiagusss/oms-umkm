@@ -5,30 +5,64 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/robots.txt', function () {
+    return response(view('robots'), 200, ['Content-Type' => 'text/plain']);
+});
+
 // Sitemap.xml — daftar URL yang layak di-index
 Route::get('/sitemap.xml', function () {
     $base = url('/');
-    $urls = [$base . '/'];
+    $urls = [[
+        'loc' => $base . '/',
+        'priority' => '1.0',
+        'changefreq' => 'daily',
+    ]];
 
-    $products = Product::where('status', 'active')->get(['slug']);
+    $products = Product::where('status', 'active')->get(['slug', 'updated_at']);
     foreach ($products as $p) {
-        $urls[] = $base . '/produk/' . $p->slug;
+        $urls[] = [
+            'loc' => $base . '/produk/' . $p->slug,
+            'priority' => '0.8',
+            'changefreq' => 'weekly',
+            'lastmod' => $p->updated_at?->toDateString(),
+        ];
     }
 
-    $categories = Category::where('status', 'active')->get(['slug']);
+    $categories = Category::where('status', 'active')->get(['slug', 'updated_at']);
     foreach ($categories as $c) {
-        $urls[] = $base . '/kategori/' . $c->slug;
+        $urls[] = [
+            'loc' => $base . '/kategori/' . $c->slug,
+            'priority' => '0.7',
+            'changefreq' => 'weekly',
+            'lastmod' => $c->updated_at?->toDateString(),
+        ];
     }
 
-    $articles = Article::where('status', 'published')->get(['slug']);
+    $articles = Article::where('status', 'published')->get(['slug', 'updated_at']);
     foreach ($articles as $a) {
-        $urls[] = $base . '/artikel/' . $a->slug;
+        $urls[] = [
+            'loc' => $base . '/artikel/' . $a->slug,
+            'priority' => '0.6',
+            'changefreq' => 'monthly',
+            'lastmod' => $a->updated_at?->toDateString(),
+        ];
     }
 
     $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
     foreach ($urls as $u) {
-        $xml .= "  <url><loc>" . htmlspecialchars($u, ENT_XML1, 'UTF-8') . "</loc></url>\n";
+        $xml .= "  <url>\n";
+        $xml .= "    <loc>" . htmlspecialchars($u['loc'], ENT_XML1, 'UTF-8') . "</loc>\n";
+        if (!empty($u['lastmod'])) {
+            $xml .= "    <lastmod>" . $u['lastmod'] . "</lastmod>\n";
+        }
+        if (!empty($u['changefreq'])) {
+            $xml .= "    <changefreq>" . $u['changefreq'] . "</changefreq>\n";
+        }
+        if (!empty($u['priority'])) {
+            $xml .= "    <priority>" . $u['priority'] . "</priority>\n";
+        }
+        $xml .= "  </url>\n";
     }
     $xml .= '</urlset>';
 

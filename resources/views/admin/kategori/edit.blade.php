@@ -11,28 +11,28 @@
 ])
 
 <div class="max-w-3xl rounded-[var(--radius-xl)] border border-[var(--color-paper-3)] bg-white p-6 sm:p-8">
-    <form method="POST" action="{{ route('admin.kategori.update', $cat) }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.kategori.update', $kategori) }}" class="space-y-6">
         @csrf
         @method('PUT')
         <div class="grid gap-6 sm:grid-cols-2"><div>
     <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Nama</label>
-            <input type="text" name="name" required value="{{ old('name', $cat->name) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+            <input type="text" name="name" required value="{{ old('name', $kategori->name) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
 </div>
 <div>
     <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Slug</label>
-            <input type="text" name="slug" required value="{{ old('slug', $cat->slug) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+            <input type="text" name="slug" required value="{{ old('slug', $kategori->slug) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
 </div>
 <div>
     <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Icon</label>
-            <input type="text" name="icon" value="{{ old('icon', $cat->icon) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+            <input type="text" name="icon" value="{{ old('icon', $kategori->icon) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
 </div>
 <div>
     <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Urutan</label>
-            <input type="number" name="ord" min="0" value="{{ old('ord', $cat->ord) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+            <input type="number" name="ord" min="0" value="{{ old('ord', $kategori->ord) }}" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
 </div>
 <div>
     <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Status</label>
-            <select name="status" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm"><option value="active" @selected(old('status', $cat->status) === 'active')>Aktif</option><option value="inactive" @selected(old('status', $cat->status) === 'inactive')>Nonaktif</option></select>
+            <select name="status" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm"><option value="active" @selected(old('status', $kategori->status) === 'active')>Aktif</option><option value="inactive" @selected(old('status', $kategori->status) === 'inactive')>Nonaktif</option></select>
 </div>
     </div>
 

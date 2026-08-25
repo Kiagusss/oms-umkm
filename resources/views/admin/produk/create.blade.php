@@ -11,7 +11,7 @@
 ])
 
 <div class="max-w-3xl rounded-[var(--radius-xl)] border border-[var(--color-paper-3)] bg-white p-6 sm:p-8">
-    <form method="POST" action="{{ route('admin.produk.store') }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.produk.store') }}" enctype="multipart/form-data" class="space-y-6">
         @csrf
         <div class="grid gap-6 sm:grid-cols-2">
             <div>
@@ -67,12 +67,20 @@
             </div>
         </div>
         <div>
-            <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">URL Gambar Utama</label>
-            <input type="text" name="thumbnail" value="{{ old('thumbnail') }}" placeholder="/images/products/lenjer.jpg" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+            <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Gambar Utama</label>
+            <input type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm file:mr-3 file:rounded-[var(--radius-md)] file:border-0 file:bg-[var(--color-accent-light)] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-[var(--color-accent)] hover:file:bg-[var(--color-accent)] hover:file:text-white">
+            <p class="mt-1 text-xs text-[var(--color-ink-3)]">JPG/PNG/WebP, maksimal 2 MB, dimensi maks 4096×4096 px.</p>
+            @error('thumbnail')
+                <p class="mt-1 text-xs text-[var(--color-danger)]">{{ $message }}</p>
+            @enderror
         </div>
         <div>
-            <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Gambar Galeri (pisahkan dengan koma)</label>
-            <input type="text" name="images_list" value="{{ old('images_list') }}" placeholder="/images/products/a.jpg, /images/products/b.jpg" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">
+            <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Gambar Galeri (boleh lebih dari satu)</label>
+            <input type="file" name="images[]" accept="image/jpeg,image/png,image/webp" multiple class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm file:mr-3 file:rounded-[var(--radius-md)] file:border-0 file:bg-[var(--color-accent-light)] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-[var(--color-accent)] hover:file:bg-[var(--color-accent)] hover:file:text-white">
+            <p class="mt-1 text-xs text-[var(--color-ink-3)]">Tahan Ctrl/⌘ untuk memilih banyak file. JPG/PNG/WebP, masing-masing maks 2 MB.</p>
+            @error('images.*')
+                <p class="mt-1 text-xs text-[var(--color-danger)]">{{ $message }}</p>
+            @enderror
         </div>
         <div class="grid gap-6 sm:grid-cols-2">
             <div>

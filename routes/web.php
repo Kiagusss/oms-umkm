@@ -52,5 +52,11 @@ Route::prefix('admin')->group(function () {
         Route::put('pengaturan', [SettingController::class, 'update'])->name('admin.pengaturan.update');
         Route::get('seo', [SeoController::class, 'edit'])->name('admin.seo');
         Route::put('seo', [SeoController::class, 'update'])->name('admin.seo.update');
+
+        // AI assistant (Laravel AI SDK) — hanya untuk admin login.
+        // Form/UI pengelolaan ada di resources/views/admin/ai/.
+        Route::view('ai', 'admin.ai.index')->name('admin.ai');
+        Route::post('ai/chat', [\App\Http\Controllers\Ai\DiaPempekAIController::class, 'adminChat'])
+            ->name('admin.ai.chat');
     });
 });

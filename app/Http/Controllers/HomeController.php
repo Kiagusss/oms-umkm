@@ -29,6 +29,28 @@ class HomeController extends Controller
             'seoTitle' => 'Pempek Palembang — Pempek Asli Palembang, Lezat & Fresh Setiap Hari',
             'seoDescription' => 'Pempek asli Palembang dibuat fresh setiap hari dari ikan tenggiri pilihan dengan resep turun-temurun 3 generasi. Tanpa pengawet, pengiriman cepat ke seluruh Indonesia. Pesan via WhatsApp!',
             'metaKeywords' => 'pempek palembang, pempek asli palembang, pempek kapal selam, pempek lenjer, pempek adaan, pempek frozen, makanan khas palembang, oleh oleh palembang, pempek online, jual pempek',
+            'schemaJsonLd' => json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'Restaurant',
+                'name' => config('app.name', 'Pempek Palembang'),
+                'image' => asset('images/hero-pempek.png'),
+                'servesCuisine' => 'Pempek Palembang',
+                'priceRange' => 'Rp 10.000 - Rp 150.000',
+                'telephone' => '+' . $waNumber,
+                'url' => url('/'),
+                'address' => [
+                    '@type' => 'PostalAddress',
+                    'addressLocality' => 'Palembang',
+                    'addressRegion' => 'Sumatera Selatan',
+                    'addressCountry' => 'ID',
+                ],
+                'areaServed' => 'Indonesia',
+                'sameAs' => collect([
+                    config('app.instagram'),
+                    config('app.facebook'),
+                    config('app.tiktok'),
+                ])->filter()->values()->all(),
+            ], JSON_UNESCAPED_SLASHES),
         ];
 
         // Visitor tracker — hash IP, privasi
