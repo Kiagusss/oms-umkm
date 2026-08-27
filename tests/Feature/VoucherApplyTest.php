@@ -23,7 +23,7 @@ class VoucherApplyTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'DISCOUNT10',
             'total' => 100000,
         ]);
@@ -54,7 +54,7 @@ class VoucherApplyTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'DISCOUNT50K',
             'total' => 100000,
         ]);
@@ -85,7 +85,7 @@ class VoucherApplyTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'DISCOUNT_MIN',
             'total' => 100000,
         ]);
@@ -96,7 +96,7 @@ class VoucherApplyTest extends TestCase
 
     public function test_rejects_invalid_voucher_code()
     {
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'INVALID',
             'total' => 100000,
         ]);
@@ -118,7 +118,7 @@ class VoucherApplyTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'EXPIRED',
             'total' => 100000,
         ]);
@@ -140,7 +140,7 @@ class VoucherApplyTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'FUTURE',
             'total' => 100000,
         ]);
@@ -162,7 +162,7 @@ class VoucherApplyTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'LIMITED',
             'total' => 100000,
         ]);
@@ -184,7 +184,7 @@ class VoucherApplyTest extends TestCase
             'is_active' => false,
         ]);
 
-        $response = $this->postJson('/api/voucher/apply', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/voucher/apply', [
             'code' => 'INACTIVE',
             'total' => 100000,
         ]);

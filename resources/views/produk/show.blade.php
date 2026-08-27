@@ -47,6 +47,8 @@
             @else
                 <p class="mt-4 text-sm font-medium text-[var(--color-danger)]">Stok habis</p>
             @endif
+
+            @include('partials.ongkir-widget')
         </div>
     </div>
 

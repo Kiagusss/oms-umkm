@@ -29,7 +29,7 @@ class HappyHourPosTest extends TestCase
 
         $product = Product::factory()->create(['price' => 10000, 'stock' => 5]);
 
-        $response = $this->getJson('/api/pos-products');
+        $response = $this->withSession(['admin_authenticated' => true])->getJson('/api/pos-products');
 
         $response->assertOk()
                  ->assertJsonFragment(['happy_hour_active' => true])
@@ -48,7 +48,7 @@ class HappyHourPosTest extends TestCase
 
         $product = Product::factory()->create(['price' => 10000, 'stock' => 5]);
 
-        $response = $this->getJson('/api/pos-products');
+        $response = $this->withSession(['admin_authenticated' => true])->getJson('/api/pos-products');
 
         $response->assertOk()
                  ->assertJsonFragment(['happy_hour_active' => false])

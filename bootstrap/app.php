@@ -21,6 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
         ]);
 
+        // Grup API yang butuh session admin: cookie + session dulu, baru cek auth.
+        $middleware->group('admin.api', [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \App\Http\Middleware\AdminAuth::class,
+        ]);
+
         // Global middleware: jalan di SEMUA request web
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,

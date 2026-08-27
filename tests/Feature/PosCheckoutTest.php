@@ -20,7 +20,7 @@ class PosCheckoutTest extends TestCase
             'stock' => 10,
         ]);
 
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'     => 'Budi',
             'customer_whatsapp' => '081234567890',
             'items'             => [['id' => $product->id, 'quantity' => 2]],
@@ -45,7 +45,7 @@ class PosCheckoutTest extends TestCase
     #[Test]
     public function checkout_rejects_empty_cart(): void
     {
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'  => 'Budi',
             'items'          => [],
             'payment_method' => 'Tunai',
@@ -63,7 +63,7 @@ class PosCheckoutTest extends TestCase
             'stock' => 1,
         ]);
 
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'  => 'Budi',
             'items'          => [['id' => $product->id, 'quantity' => 5]],
             'payment_method' => 'Tunai',

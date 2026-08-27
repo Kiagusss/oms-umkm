@@ -9,7 +9,8 @@ class PosCheckoutRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // ponytail: add admin auth check when middleware applied to API routes
+        // Route sudah dilindungi middleware admin.auth; ini lapis kedua.
+        return (bool) session('admin_authenticated');
     }
 
     public function rules(): array

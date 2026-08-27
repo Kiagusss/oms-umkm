@@ -72,9 +72,10 @@ class DiaPempekAIController extends Controller
             'pin' => 'sometimes|nullable|string',
         ]);
 
-        // PIN check (sama dengan ChatController)
+        // PIN check (sama dengan ChatController) — bandingkan timing-safe
         $expectedPin = config('services.chat.pin');
-        if ($expectedPin && ($data['pin'] ?? null) !== $expectedPin) {
+        $givenPin = (string) ($data['pin'] ?? '');
+        if ($expectedPin && !hash_equals((string) $expectedPin, $givenPin)) {
             return response()->json(['error' => 'PIN admin salah.'], 403);
         }
 

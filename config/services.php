@@ -25,6 +25,13 @@ return [
         'model' => env('CHAT_MODEL', 'gratis'),
     ],
 
+    // Cek ongkir via RajaOngkir/Komerce (paket Starter gratis: 100 hit/hari)
+    'ongkir' => [
+        'api_key' => env('RAJAONGKIR_API_KEY'),
+        'origin_postal' => env('ONGKIR_ORIGIN_POSTAL', 'Palembang'),
+        'couriers' => env('ONGKIR_COURIERS', 'jne:jnt:sicepat'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

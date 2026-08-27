@@ -19,7 +19,7 @@ class TrackController extends Controller
             'referrer' => 'nullable|string|max:500',
         ]);
 
-        $ip = $request->ip();
+        $ip = hash('sha256', $request->ip() . config('app.key')); // privacy: jangan simpan IP mentah
         $today = now()->toDateString();
 
         // Mencegah duplikat dari halaman yang sama di hari yang sama

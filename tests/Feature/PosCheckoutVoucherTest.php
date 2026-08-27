@@ -26,7 +26,7 @@ class PosCheckoutVoucherTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'  => 'Budi',
             'items'          => [['id' => $product->id, 'quantity' => 2]],
             'payment_method' => 'Tunai',
@@ -67,7 +67,7 @@ class PosCheckoutVoucherTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'  => 'Budi',
             'items'          => [['id' => $product->id, 'quantity' => 10]],
             'payment_method' => 'Tunai',
@@ -88,7 +88,7 @@ class PosCheckoutVoucherTest extends TestCase
     {
         $product = Product::factory()->create(['price' => 10000, 'stock' => 10]);
 
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'  => 'Budi',
             'items'          => [['id' => $product->id, 'quantity' => 1]],
             'payment_method' => 'Tunai',
@@ -115,7 +115,7 @@ class PosCheckoutVoucherTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'  => 'Budi',
             'items'          => [['id' => $product->id, 'quantity' => 1]],
             'payment_method' => 'Tunai',
@@ -141,7 +141,7 @@ class PosCheckoutVoucherTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->postJson('/api/pos-checkout', [
+        $response = $this->withSession(['admin_authenticated' => true])->postJson('/api/pos-checkout', [
             'customer_name'  => 'Budi',
             'items'          => [['id' => $product->id, 'quantity' => 1]],
             'payment_method' => 'Tunai',
