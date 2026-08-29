@@ -195,10 +195,38 @@
                         <span class="text-xl font-extrabold tabular-nums text-emerald-600" x-text="'Rp ' + formatNumber(total)"></span>
                     </div>
                 </div>
+                <div class="mb-3 grid grid-cols-2 gap-2">
+                    <button type="button" @click="payMethod = 'Tunai'"
+                        :class="payMethod === 'Tunai' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'"
+                        class="rounded-xl py-2.5 text-sm font-bold transition">Tunai</button>
+                    <button type="button" @click="payMethod = 'QRIS'"
+                        :class="payMethod === 'QRIS' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'"
+                        class="rounded-xl py-2.5 text-sm font-bold transition">QRIS</button>
+                </div>
                 <button @click="processTransaction()" :disabled="cart.length === 0"
-                    class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
+                    class="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
-                    <span x-text="busy ? 'Memproses…' : 'Bayar Sekarang'"></span>
+                    <span x-text="busy ? 'Memproses…' : (payMethod === 'QRIS' ? 'Bayar via QRIS' : 'Bayar Sekarang')"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal QRIS simulasi (HARUS di dalam root x-data biar terikat ke posApp) --}}
+    <div x-show="qrisOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
+        <div class="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+            <h3 class="text-base font-extrabold text-slate-800">Simulasi Pembayaran QRIS</h3>
+            <p class="mt-1 text-xs text-slate-400">Order #<span x-text="qrisOrderId"></span> — scan QR di bawah (simulasi)</p>
+            <div class="mt-4 flex justify-center rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
+                <canvas id="qris-canvas"></canvas>
+            </div>
+            <p class="mt-3 text-sm font-bold tabular-nums text-emerald-600" x-text="'Rp ' + formatNumber(qrisAmount)"></p>
+            <div class="mt-5 grid grid-cols-2 gap-2">
+                <button @click="qrisOpen = false"
+                    class="rounded-xl bg-slate-100 py-2.5 text-sm font-bold text-slate-500 transition hover:bg-slate-200">Nanti</button>
+                <button @click="simulatePayment()" :disabled="qrisBusy"
+                    class="rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-500 disabled:opacity-40">
+                    <span x-text="qrisBusy ? 'Memproses…' : 'Simulasikan Terbayar'"></span>
                 </button>
             </div>
         </div>
@@ -206,6 +234,7 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('posApp', () => ({
@@ -227,6 +256,14 @@ document.addEventListener('alpine:init', () => {
         discount: 0,
         voucherError: '',
         voucherLoading: false,
+
+        // QRIS simulasi state
+        payMethod: 'Tunai',
+        qrisOpen: false,
+        qrisPayload: '',
+        qrisOrderId: null,
+        qrisAmount: 0,
+        qrisBusy: false,
 
         // Held carts (localStorage)
         heldCarts: [],
@@ -386,8 +423,8 @@ document.addEventListener('alpine:init', () => {
                 const payload = {
                     customer_name: this.customer,
                     items: this.cart.map(item => ({ id: item.productId, quantity: item.quantity })),
-                    payment_method: 'Tunai',
-                    cash_received: this.total,
+                    payment_method: this.payMethod,
+                    cash_received: this.payMethod === 'Tunai' ? this.total : null,
                     voucher_code: this.voucherApplied ? this.voucherApplied.code : null
                 };
                 const response = await fetch('/api/pos-checkout', {
@@ -397,7 +434,11 @@ document.addEventListener('alpine:init', () => {
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    alert('Transaksi berhasil: ' + data.order_id);
+                    if (data.payment_method === 'QRIS') {
+                        await this.showQris(data.order_id);
+                    } else {
+                        alert('Transaksi berhasil: ' + data.order_id);
+                    }
                     this.cart = [];
                     this.customer = '';
                     this.clearVoucher();
@@ -408,6 +449,57 @@ document.addEventListener('alpine:init', () => {
                 alert('Koneksi error: ' + err.message);
             } finally {
                 this.busy = false;
+            }
+        },
+
+        async showQris(orderId) {
+            this.qrisBusy = true;
+            try {
+                const res = await fetch('/api/qris/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ order_id: orderId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    this.qrisPayload = data.qris_payload;
+                    this.qrisOrderId = orderId;
+                    this.qrisAmount = data.total;
+                    this.qrisOpen = true;
+                    this.$nextTick(() => this.renderQris());
+                } else {
+                    alert('Gagal membuat QRIS: ' + (data.error || 'unknown'));
+                }
+            } finally {
+                this.qrisBusy = false;
+            }
+        },
+
+        renderQris() {
+            const el = document.getElementById('qris-canvas');
+            if (el && window.QRious) {
+                new QRious({ element: el, value: this.qrisPayload, size: 240, level: 'M' });
+            }
+        },
+
+        async simulatePayment() {
+            if (!this.qrisOrderId) return;
+            this.qrisBusy = true;
+            try {
+                const res = await fetch('/api/qris/settle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                    body: JSON.stringify({ order_id: this.qrisOrderId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    this.qrisOpen = false;
+                    alert('Pembayaran QRIS terkonfirmasi — order #' + data.order_id + ' selesai.');
+                } else {
+                    alert('Gagal settle: ' + (data.error || 'unknown'));
+                }
+            } finally {
+                this.qrisBusy = false;
             }
         },
 

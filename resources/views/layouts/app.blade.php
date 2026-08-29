@@ -112,6 +112,11 @@
                 },
                 openCart() { this.isOpen = true; },
                 closeCart() { this.isOpen = false; },
+                checkoutQris() {
+                    if (!this.items.length) { alert('Keranjang masih kosong.'); return; }
+                    this.closeCart();
+                    window.location.href = '/checkout';
+                },
                 get waMessage() {
                     return this.items.map(i => `• ${i.name} x${i.quantity} = ${this.formatIDR(i.price * i.quantity)}`).join('\n');
                 },

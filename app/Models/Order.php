@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $fillable = ['name', 'whatsapp', 'products', 'notes', 'date', 'status', 'payment_method', 'cash_received', 'change_amount', 'voucher_id', 'discount'];
+    protected $fillable = ['name', 'whatsapp', 'address', 'shipping_courier', 'shipping_cost', 'products', 'notes', 'date', 'status', 'payment_method', 'cash_received', 'change_amount', 'voucher_id', 'discount'];
 
     protected $casts = [
         'products' => 'array',
@@ -24,5 +24,11 @@ class Order extends Model
             $total += $item['price'] * $item['quantity'];
         }
         return $total;
+    }
+
+    /** Total akhir: barang - diskon + ongkir. */
+    public function grandTotal(): int
+    {
+        return max(0, $this->total() - (int) ($this->discount ?? 0)) + (int) ($this->shipping_cost ?? 0);
     }
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\ArticleController as PublicArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicCategoryController;
+use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\PublicProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,12 @@ Route::get('/artikel', [PublicArticleController::class, 'index'])->name('artikel
 Route::get('/artikel/{slug}', [PublicArticleController::class, 'show'])->name('artikel.show');
 Route::get('/produk/{slug}', [PublicProductController::class, 'show'])->name('produk.show');
 Route::get('/kategori/{slug}', [PublicCategoryController::class, 'show'])->name('kategori.show');
+
+// Checkout publik + status pesanan
+Route::get('/checkout', [PublicOrderController::class, 'form'])->name('checkout.form');
+Route::post('/checkout', [PublicOrderController::class, 'checkout'])->name('checkout')->middleware('throttle:6,1');
+Route::post('/api/public/qris/settle', [PublicOrderController::class, 'settleQris'])->middleware('throttle:10,1');
+Route::get('/pesanan/{order}', [PublicOrderController::class, 'show'])->name('pesanan.show');
 
 // ─── Auth admin ───────────────────────────────────────────
 Route::prefix('admin')->group(function () {

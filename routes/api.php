@@ -29,7 +29,9 @@ Route::middleware('admin.api')->group(function () {
     Route::get('/pos-products', [\App\Http\Controllers\Admin\AdminController::class, 'posProducts']);
     Route::post('/pos-checkout', [\App\Http\Controllers\Admin\AdminController::class, 'posCheckout']);
     Route::post('/upload-image', [UploadImageController::class, 'store']);
-    Route::post('/voucher/apply', [VoucherController::class, 'apply']);
+    Route::post('/voucher/apply', [\App\Http\Controllers\Api\VoucherController::class, 'apply']);
+    Route::post('/qris/create', [\App\Http\Controllers\Api\QrisController::class, 'create']);
+    Route::post('/qris/settle', [\App\Http\Controllers\Api\QrisController::class, 'settle']);
 });
 
 // Chatbot admin (agent dengan tool baca DB): wajib login admin, PIN tetap sebagai lapis kedua.

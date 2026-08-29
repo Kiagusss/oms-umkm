@@ -107,22 +107,29 @@ class TransactionService
                 $changeAmount = max(0, $cashReceived - $grandTotal);
             }
 
+            // QRIS = simulasi: order menunggu "pembayaran" (settle manual admin),
+            // metode lain langsung completed seperti biasa.
+            $status = $paymentMethod === 'QRIS' ? 'pending' : 'completed';
+
             if ($voucher) {
                 $voucher->increment('used_count');
             }
 
             return Order::create([
-                'name'           => $validated['customer_name'],
-                'whatsapp'       => $validated['customer_whatsapp'] ?? '',
-                'products'       => json_encode($calc['lineItems'], JSON_UNESCAPED_UNICODE),
-                'notes'          => $validated['notes'] ?? null,
-                'date'           => now()->toDateString(),
-                'status'         => 'completed',
-                'payment_method' => $paymentMethod,
-                'cash_received'  => $cashReceived,
-                'change_amount'  => $changeAmount,
-                'voucher_id'     => $voucher?->id,
-                'discount'       => $discount,
+                'name'             => $validated['customer_name'],
+                'whatsapp'         => $validated['customer_whatsapp'] ?? '',
+                'address'          => $validated['address'] ?? null,
+                'shipping_courier' => $validated['shipping_courier'] ?? null,
+                'shipping_cost'    => (int) ($validated['shipping_cost'] ?? 0),
+                'products'         => json_encode($calc['lineItems'], JSON_UNESCAPED_UNICODE),
+                'notes'            => $validated['notes'] ?? null,
+                'date'             => now()->toDateString(),
+                'status'           => $status,
+                'payment_method'   => $paymentMethod,
+                'cash_received'    => $cashReceived,
+                'change_amount'    => $changeAmount,
+                'voucher_id'       => $voucher?->id,
+                'discount'         => $discount,
             ]);
         });
     }
