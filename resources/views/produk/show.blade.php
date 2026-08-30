@@ -70,5 +70,73 @@
             </div>
         </section>
     @endif
+
+    {{-- Rating & Review --}}
+    <section class="mt-14" id="reviews">
+        <h2 class="mb-1 text-xl font-bold text-[var(--color-ink)]">Rating & Ulasan</h2>
+        @if($avgRating)
+            <p class="mb-4 text-sm text-[var(--color-ink-3)]">
+                <span class="text-2xl font-bold text-amber-500">{{ number_format($avgRating, 1) }}</span>
+                / 5 &nbsp;·&nbsp; {{ $reviews->count() }} ulasan
+            </p>
+        @endif
+
+        @if(session('review_sent'))
+            <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                Terima kasih! Ulasanmu sedang menunggu moderasi.
+            </div>
+        @endif
+
+        {{-- Form --}}
+        <form method="POST" action="{{ route('produk.review', $product->slug) }}"
+              class="mb-8 rounded-[var(--radius-xl)] border border-[var(--color-paper-3)] bg-white p-5 shadow-sm">
+            @csrf
+            <h3 class="mb-3 text-sm font-semibold text-[var(--color-ink)]">Tulis Ulasan</h3>
+            @if($errors->any())
+                <p class="mb-3 text-sm text-[var(--color-danger)]">{{ $errors->first() }}</p>
+            @endif
+            <div class="mb-3">
+                <label class="mb-1 block text-xs font-medium text-[var(--color-ink-3)]">Nama</label>
+                <input name="name" type="text" required maxlength="80" value="{{ old('name') }}"
+                       class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus:border-[var(--color-accent)] focus:outline-none">
+            </div>
+            <div class="mb-3">
+                <label class="mb-1 block text-xs font-medium text-[var(--color-ink-3)]">Rating</label>
+                <div class="flex gap-1" x-data="{ r: {{ old('rating', 0) }} }">
+                    @for($s = 1; $s <= 5; $s++)
+                        <button type="button" @click="r = {{ $s }}"
+                                :class="r >= {{ $s }} ? 'text-amber-400' : 'text-slate-300'"
+                                class="text-2xl leading-none transition-colors">★</button>
+                    @endfor
+                    <input type="hidden" name="rating" :value="r">
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="mb-1 block text-xs font-medium text-[var(--color-ink-3)]">Ulasan (opsional)</label>
+                <textarea name="body" rows="3" maxlength="1000"
+                          class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus:border-[var(--color-accent)] focus:outline-none">{{ old('body') }}</textarea>
+            </div>
+            <button type="submit"
+                    class="rounded-[var(--radius-md)] bg-[var(--color-accent)] px-5 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]">
+                Kirim Ulasan
+            </button>
+        </form>
+
+        {{-- Daftar review --}}
+        @forelse($reviews as $review)
+            <div class="mb-4 rounded-[var(--radius-xl)] border border-[var(--color-paper-3)] bg-white p-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-[var(--color-ink)]">{{ $review->name }}</p>
+                    <span class="text-amber-400 text-sm">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</span>
+                </div>
+                @if($review->body)
+                    <p class="mt-1 text-sm text-[var(--color-ink-2)]">{{ $review->body }}</p>
+                @endif
+                <p class="mt-1 text-xs text-[var(--color-ink-3)]">{{ $review->created_at->translatedFormat('d F Y') }}</p>
+            </div>
+        @empty
+            <p class="text-sm text-[var(--color-ink-3)]">Belum ada ulasan. Jadilah yang pertama!</p>
+        @endforelse
+    </section>
 </div>
 @endsection

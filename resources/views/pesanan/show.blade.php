@@ -177,6 +177,33 @@
         </div>
     </div>
 
+    {{-- Beli Lagi --}}
+    @php
+        $buyAgainItems = is_array($order->products) ? $order->products : json_decode((string) $order->products, true) ?? [];
+        $buyAgainCart = collect($buyAgainItems)->map(fn($i) => ['id' => $i['productId'] ?? $i['id'] ?? null, 'name' => $i['productName'], 'price' => $i['price'], 'quantity' => $i['quantity'], 'thumbnail' => $i['thumbnail'] ?? ''])->filter(fn($i) => $i['id'])->values();
+    @endphp
+    @if($buyAgainCart->isNotEmpty())
+    <div class="mt-6 text-center">
+        <button onclick="buyAgain({{ $buyAgainCart->toJson() }})"
+            class="inline-flex items-center gap-2 rounded-xl border border-emerald-600 px-6 py-3 text-sm font-bold text-emerald-700 transition hover:bg-emerald-50 active:scale-[0.98]">
+            🛒 Beli Lagi
+        </button>
+    </div>
+    <script>
+    function buyAgain(items) {
+        var cart = JSON.parse(localStorage.getItem('pempek_cart') || '[]');
+        items.forEach(function(item) {
+            var idx = cart.findIndex(function(c) { return c.id === item.id; });
+            if (idx >= 0) cart[idx].quantity += item.quantity;
+            else cart.push(item);
+        });
+        localStorage.setItem('pempek_cart', JSON.stringify(cart));
+        window.dispatchEvent(new CustomEvent('pempek:cart-updated'));
+        window.location.href = '/checkout';
+    }
+    </script>
+    @endif
+
     <p class="mt-6 text-center text-xs text-slate-400">
         <a href="{{ route('home') }}" class="text-emerald-600 hover:underline">← Kembali ke beranda</a>
     </p>

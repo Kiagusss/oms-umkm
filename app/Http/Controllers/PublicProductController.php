@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Review;
+use Illuminate\Http\Request;
 
 class PublicProductController extends Controller
 {
     public function show(string $slug)
     {
         $product = Product::with('category')->where('slug', $slug)->where('status', 'active')->firstOrFail();
+        $reviews = Review::where('product_id', $product->id)->approved()->latest()->get();
 
         $title = $product->seo_title ?: $product->name . ' — Pempek Palembang';
         $description = $product->seo_description ?: ($product->short_description ?: 'Pempek ' . $product->name . ' asli Palembang, dibuat fresh dari ikan tenggiri pilihan. Pesan online, kirim ke seluruh Indonesia.');
@@ -58,6 +61,20 @@ class PublicProductController extends Controller
             'ogDescription' => $description,
             'ogImage' => $image,
             'schemaJsonLd' => json_encode($schema, JSON_UNESCAPED_SLASHES),
+            'reviews' => $reviews,
+            'avgRating' => $reviews->avg('rating'),
         ]);
+    }
+
+    public function storeReview(Request $request, string $slug)
+    {
+        $product = Product::where('slug', $slug)->where('status', 'active')->firstOrFail();
+        $data = $request->validate([
+            'name'   => 'required|string|max:80',
+            'rating' => 'required|integer|min:1|max:5',
+            'body'   => 'nullable|string|max:1000',
+        ]);
+        Review::create(array_merge($data, ['product_id' => $product->id]));
+        return back()->with('review_sent', true);
     }
 }

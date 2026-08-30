@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SeoController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TestimonialController;
@@ -26,6 +27,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/artikel', [PublicArticleController::class, 'index'])->name('artikel.index');
 Route::get('/artikel/{slug}', [PublicArticleController::class, 'show'])->name('artikel.show');
 Route::get('/produk/{slug}', [PublicProductController::class, 'show'])->name('produk.show');
+Route::post('/produk/{slug}/review', [PublicProductController::class, 'storeReview'])->name('produk.review')->middleware('throttle:3,1');
 Route::get('/kategori/{slug}', [PublicCategoryController::class, 'show'])->name('kategori.show');
 
 // Checkout publik + status pesanan
@@ -55,6 +57,9 @@ Route::prefix('admin')->group(function () {
         Route::resource('pesanan', OrderController::class)->names('admin.pesanan');
         Route::get('pesanan/{pesanan}/struk', [OrderController::class, 'struk'])->name('admin.pesanan.struk');
         Route::resource('voucher', VoucherController::class)->names('admin.voucher');
+        Route::get('review', [ReviewController::class, 'index'])->name('admin.review.index');
+        Route::patch('review/{review}/approve', [ReviewController::class, 'approve'])->name('admin.review.approve');
+        Route::delete('review/{review}', [ReviewController::class, 'destroy'])->name('admin.review.destroy');
         Route::get('pengaturan', [SettingController::class, 'edit'])->name('admin.pengaturan');
         Route::put('pengaturan', [SettingController::class, 'update'])->name('admin.pengaturan.update');
         Route::get('seo', [SeoController::class, 'edit'])->name('admin.seo');
