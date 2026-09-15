@@ -37,6 +37,18 @@
             ['label' => 'Ulasan', 'route' => 'admin.review.index', 'icon' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', 'badge' => null],
         ];
 
+        $menuOps = [
+            ['label' => 'Cabang', 'route' => 'admin.cabang.index', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+            ['label' => 'Bahan & Stok', 'route' => 'admin.inventori.index', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+            ['label' => 'Resep & HPP', 'route' => 'admin.resep.index', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'],
+            ['label' => 'Supplier', 'route' => 'admin.supplier.index', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'],
+            ['label' => 'Pembelian PO', 'route' => 'admin.pembelian.index', 'icon' => 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'],
+            ['label' => 'Biaya Ops', 'route' => 'admin.biaya.index', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label' => 'Transfer Stok', 'route' => 'admin.transfer.index', 'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
+            ['label' => 'Laba Rugi', 'route' => 'admin.laporan.keuangan', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+            ['label' => 'Pengguna & Hak', 'route' => 'admin.pengguna.index', 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
+        ];
+
         $menuGeneral = [
             ['label' => 'Testimoni', 'route' => 'admin.testimoni.index', 'icon' => 'M12 2a5 5 0 015 5c0 2-1.5 3.5-3 4.5V14h-4v-2.5C8.5 10.5 7 9 7 7a5 5 0 015-5zm-4 14h8v2H8z'],
             ['label' => 'FAQ', 'route' => 'admin.faq.index', 'icon' => 'M12 8a3 3 0 10-3 3c.7 0 1.3.3 1.7.8L12 14m0-6l4-4'],
@@ -48,31 +60,33 @@
         ];
 
         $current = request()->route()?->getName() ?? '';
-        $isProduk = str_starts_with($current, 'admin.produk');
-        $isPaket = str_starts_with($current, 'admin.paket');
-        $isKategori = str_starts_with($current, 'admin.kategori');
-        $isArtikel = str_starts_with($current, 'admin.artikel');
-        $isTestimoni = str_starts_with($current, 'admin.testimoni');
-        $isFaq = str_starts_with($current, 'admin.faq');
-        $isBanner = str_starts_with($current, 'admin.banner');
-        $isGaleri = str_starts_with($current, 'admin.galeri');
-        $isPesanan = str_starts_with($current, 'admin.pesanan');
-        $isVoucher = str_starts_with($current, 'admin.voucher');
-        $isReview = str_starts_with($current, 'admin.review');
 
-        $isActiveFn = function($itemRoute) use ($current, $isProduk, $isPaket, $isKategori, $isArtikel, $isTestimoni, $isFaq, $isBanner, $isGaleri, $isPesanan, $isVoucher, $isReview) {
-            return $current === $itemRoute ||
-                ($isProduk && $itemRoute === 'admin.produk.index') ||
-                ($isPaket && $itemRoute === 'admin.paket.index') ||
-                ($isKategori && $itemRoute === 'admin.kategori.index') ||
-                ($isArtikel && $itemRoute === 'admin.artikel.index') ||
-                ($isTestimoni && $itemRoute === 'admin.testimoni.index') ||
-                ($isFaq && $itemRoute === 'admin.faq.index') ||
-                ($isBanner && $itemRoute === 'admin.banner.index') ||
-                ($isGaleri && $itemRoute === 'admin.galeri.index') ||
-                ($isPesanan && $itemRoute === 'admin.pesanan.index') ||
-                ($isVoucher && $itemRoute === 'admin.voucher.index') ||
-                ($isReview && $itemRoute === 'admin.review.index');
+        $isActiveFn = function($itemRoute) use ($current) {
+            if ($current === $itemRoute) return true;
+            $prefix = match($itemRoute) {
+                'admin.produk.index' => 'admin.produk',
+                'admin.paket.index' => 'admin.paket',
+                'admin.kategori.index' => 'admin.kategori',
+                'admin.artikel.index' => 'admin.artikel',
+                'admin.testimoni.index' => 'admin.testimoni',
+                'admin.faq.index' => 'admin.faq',
+                'admin.banner.index' => 'admin.banner',
+                'admin.galeri.index' => 'admin.galeri',
+                'admin.pesanan.index' => 'admin.pesanan',
+                'admin.voucher.index' => 'admin.voucher',
+                'admin.review.index' => 'admin.review',
+                'admin.cabang.index' => 'admin.cabang',
+                'admin.inventori.index' => 'admin.inventori',
+                'admin.resep.index' => 'admin.resep',
+                'admin.supplier.index' => 'admin.supplier',
+                'admin.pembelian.index' => 'admin.pembelian',
+                'admin.biaya.index' => 'admin.biaya',
+                'admin.transfer.index' => 'admin.transfer',
+                'admin.pengguna.index' => 'admin.pengguna',
+                'admin.laporan.keuangan' => 'admin.laporan',
+                default => null,
+            };
+            return $prefix ? str_starts_with($current, $prefix) : false;
         };
     @endphp
 
@@ -110,6 +124,25 @@
                                             {{ $item['badge'] }}
                                         </span>
                                     @endif
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                {{-- OPERASIONAL Section --}}
+                <div class="mb-6">
+                    <p class="px-4 text-[11px] font-bold tracking-wider text-slate-400 uppercase">Operasional & Bisnis</p>
+                    <ul class="mt-2 space-y-1">
+                        @foreach($menuOps as $item)
+                            @php $active = $isActiveFn($item['route']); @endphp
+                            <li>
+                                <a href="{{ route($item['route']) }}"
+                                   class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all {{ $active ? 'bg-emerald-50/70 text-emerald-800 border-l-4 border-emerald-700 pl-3' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 {{ $active ? 'text-emerald-700' : 'text-slate-400 group-hover:text-slate-500' }}">
+                                        <path d="{{ $item['icon'] }}" />
+                                    </svg>
+                                    <span>{{ $item['label'] }}</span>
                                 </a>
                             </li>
                         @endforeach
@@ -200,6 +233,25 @@
 
                 {{-- Right utility bar --}}
                 <div class="flex items-center gap-3">
+                    {{-- Branch Switcher --}}
+                    @php $allBranches = \App\Models\Branch::where('is_active', true)->get(); @endphp
+                    @if($allBranches->isNotEmpty())
+                        <form method="POST" action="{{ route('admin.switch-branch') }}" class="flex items-center">
+                            @csrf
+                            <div class="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50/80 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-100 transition shadow-xs">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-600 shrink-0"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                <select name="branch_id" onchange="this.form.submit()" class="bg-transparent border-0 text-xs font-bold text-slate-800 cursor-pointer outline-none pr-1">
+                                    <option value="">Semua Cabang</option>
+                                    @foreach($allBranches as $b)
+                                        <option value="{{ $b->id }}" {{ session('selected_branch_id') == $b->id ? 'selected' : '' }}>
+                                            {{ $b->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </form>
+                    @endif
+
                     {{-- Mail Icon --}}
                     <button class="hidden h-10 w-10 items-center justify-center rounded-full border border-slate-100 text-slate-500 hover:bg-slate-50 sm:flex transition shadow-sm">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><path d="M22 6l-10 7L2 6" /></svg>
@@ -258,6 +310,24 @@
                                                     {{ $item['badge'] }}
                                                 </span>
                                             @endif
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="px-4 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Operasional & Bisnis</p>
+                            <ul class="mt-2 space-y-1">
+                                @foreach($menuOps as $item)
+                                    @php $active = $isActiveFn($item['route']); @endphp
+                                    <li>
+                                        <a href="{{ route($item['route']) }}" @click="sidebarOpen = false"
+                                           class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold {{ $active ? 'bg-emerald-50/70 text-emerald-800 border-l-4 border-emerald-700 pl-3' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-850' }}">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 {{ $active ? 'text-emerald-700' : 'text-slate-400' }}">
+                                                <path d="{{ $item['icon'] }}" />
+                                            </svg>
+                                            <span>{{ $item['label'] }}</span>
                                         </a>
                                     </li>
                                 @endforeach

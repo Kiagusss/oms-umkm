@@ -55,17 +55,34 @@ class ProductController extends Controller
 
         $product = Product::create($validated);
 
+        if ($request->has('variants') && is_array($request->variants)) {
+            foreach ($request->variants as $v) {
+                if (empty($v['name'])) continue;
+                $product->variants()->create([
+                    'name' => $v['name'],
+                    'sku' => $v['sku'] ?? null,
+                    'price' => (int) ($v['price'] ?? $product->price),
+                    'cost_price' => (float) ($v['cost_price'] ?? $product->cost_price ?? 0),
+                    'stock' => (int) ($v['stock'] ?? 0),
+                    'is_active' => isset($v['is_active']) ? (bool) $v['is_active'] : true,
+                ]);
+            }
+            $product->update(['has_variants' => true]);
+        }
+
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
     public function show(Product $produk)
     {
+        $produk->load(['variants', 'recipe.items.inventoryItem']);
         return view('admin.produk.show', compact('produk'));
     }
 
     public function edit(Product $produk)
     {
         $categories = Category::orderBy('ord')->get();
+        $produk->load('variants');
 
         return view('admin.produk.edit', compact('produk', 'categories'));
     }
@@ -112,6 +129,30 @@ class ProductController extends Controller
         $produk->images = $currentImages;
         $produk->save();
 
+        // Sync variants
+        if ($request->has('variants') && is_array($request->variants)) {
+            $existingIds = [];
+            foreach ($request->variants as $v) {
+                if (empty($v['name'])) continue;
+                $var = $produk->variants()->updateOrCreate(
+                    ['id' => $v['id'] ?? null],
+                    [
+                        'name' => $v['name'],
+                        'sku' => $v['sku'] ?? null,
+                        'price' => (int) ($v['price'] ?? $produk->price),
+                        'cost_price' => (float) ($v['cost_price'] ?? $produk->cost_price ?? 0),
+                        'stock' => (int) ($v['stock'] ?? 0),
+                        'is_active' => isset($v['is_active']) ? (bool) $v['is_active'] : true,
+                    ]
+                );
+                $existingIds[] = $var->id;
+            }
+            if (!empty($existingIds)) {
+                $produk->variants()->whereNotIn('id', $existingIds)->delete();
+                $produk->update(['has_variants' => true]);
+            }
+        }
+
         // Bersihkan file lama dari storage (best-effort)
         if ($request->hasFile('thumbnail') || $request->boolean('remove_thumbnail')) {
             $this->deleteStorageFile($oldThumbnail);
@@ -150,12 +191,16 @@ class ProductController extends Controller
             'slug' => "required|string|max:255|{$uniqueSlug}",
             'category_id' => 'nullable|exists:categories,id',
             'price' => 'required|integer|min:0',
+            'cost_price' => 'nullable|numeric|min:0',
             'price_strikethrough' => 'nullable|integer|min:0',
             'short_description' => 'required|string',
             'description' => 'nullable|string',
             'composition' => 'nullable|string',
             'stock' => 'required|integer|min:0',
             'weight' => 'nullable|integer|min:0',
+            'has_variants' => 'sometimes|boolean',
+            'sku' => 'nullable|string|max:50',
+            'barcode' => 'nullable|string|max:50',
             // File upload — JPEG (.jpg/.jpeg), PNG, WebP
             // Pakai 'image' + 'mimes' + 'mimetypes' supaya MIME sniffed dari isi file,
             // bukan dari ekstensi nama. Ini mengatasi JPEG dari kamera/HP yang sering

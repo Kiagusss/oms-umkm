@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Alias untuk route middleware
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
+            'permission' => \App\Http\Middleware\CheckPermission::class,
+            'role'       => \App\Http\Middleware\CheckRole::class,
         ]);
 
         // Grup API yang butuh session admin: cookie + session dulu, baru cek auth.

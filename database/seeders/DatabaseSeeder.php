@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
         $this->seedSettings();
         $this->seedSeo();
         $this->seedAdmin();
+        $this->call(\Database\Seeders\OmsManagementSeeder::class);
     }
 
     protected function seedAdmin(): void

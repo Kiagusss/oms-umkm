@@ -16,10 +16,12 @@ class PosCheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'branch_id'         => 'nullable|integer|exists:branches,id',
             'customer_name'     => 'required|string|max:255',
             'customer_whatsapp' => 'nullable|string|max:50',
             'items'             => 'required|array|min:1',
             'items.*.id'        => 'required|integer|exists:products,id',
+            'items.*.variant_id'=> 'nullable|integer|exists:product_variants,id',
             'items.*.quantity'  => 'required|integer|min:1',
             'notes'             => 'nullable|string|max:500',
             'payment_method'    => 'required|in:Tunai,Transfer,QRIS',

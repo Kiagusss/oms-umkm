@@ -69,6 +69,46 @@ class OrderController extends Controller
             $validated['products'] = json_encode($request->input('products', []));
         }
 
+        // Restore stock if transitioning to cancelled
+        if ($pesanan->status !== 'cancelled' && $validated['status'] === 'cancelled') {
+            $items = is_array($pesanan->products) ? $pesanan->products : json_decode((string) $pesanan->products, true) ?? [];
+            foreach ($items as $item) {
+                $productId = $item['productId'] ?? null;
+                $variantId = $item['variantId'] ?? null;
+                $qty = (int) ($item['quantity'] ?? 0);
+                if ($productId && $qty > 0) {
+                    \App\Models\Product::where('id', $productId)->increment('stock', $qty);
+                    if ($variantId) {
+                        \App\Models\ProductVariant::where('id', $variantId)->increment('stock', $qty);
+                    }
+                    if ($pesanan->branch_id) {
+                        $bi = \App\Models\BranchInventory::where('branch_id', $pesanan->branch_id)
+                            ->where('product_id', $productId)
+                            ->where('product_variant_id', $variantId)
+                            ->first();
+                        $balanceAfter = 0;
+                        if ($bi) {
+                            $bi->increment('quantity', $qty);
+                            $balanceAfter = (float) $bi->fresh()->quantity;
+                        }
+                        \App\Models\StockMovement::create([
+                            'branch_id'          => $pesanan->branch_id,
+                            'inventory_item_id'  => null,
+                            'product_id'         => $productId,
+                            'product_variant_id' => $variantId,
+                            'type'               => 'sale_return',
+                            'quantity'           => $qty,
+                            'balance_after'      => $balanceAfter,
+                            'reference_type'     => Order::class,
+                            'reference_id'       => $pesanan->id,
+                            'notes'              => "Pembatalan Order #{$pesanan->id}",
+                            'user_id'            => auth()->id() ?? session('admin_user_id'),
+                        ]);
+                    }
+                }
+            }
+        }
+
         $pesanan->update($validated);
 
         return redirect()->route('admin.pesanan.index')->with('success', 'Pesanan berhasil diperbarui.');
