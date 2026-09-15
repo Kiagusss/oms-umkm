@@ -12,11 +12,12 @@
 
 @php
     $initialItems = $recipe->items->map(function ($it) {
+        $cost = (float) ($it->inventoryItem?->cost_per_unit ?? $it->inventoryItem?->unit_cost ?? $it->cost_per_unit ?? 0);
         return [
-            'inventory_item_id' => $it->inventory_item_id,
+            'inventory_item_id' => (int) $it->inventory_item_id,
             'quantity' => (float) $it->quantity,
-            'unit_cost' => (float) ($it->inventoryItem?->unit_cost ?? 0),
-            'unit' => $it->inventoryItem?->unit ?? '',
+            'unit_cost' => $cost,
+            'unit' => $it->inventoryItem?->unit ?? $it->unit ?? '',
         ];
     })->values()->all();
 
@@ -29,7 +30,9 @@
      x-data="{
          items: {{ json_encode($initialItems) }},
          inventoryOptions: {{ json_encode($inventoryItems) }},
-         yieldVal: {{ (float) $recipe->yield }},
+         yieldVal: {{ (float) ($recipe->yield ?: 1) }},
+         packagingCost: {{ (int) ($recipe->packaging_cost ?? 0) }},
+         additionalCost: {{ (int) ($recipe->additional_cost ?? 0) }},
          addItem() {
              this.items.push({ inventory_item_id: '', quantity: 1, unit_cost: 0, unit: '' });
          },
@@ -39,12 +42,20 @@
              }
          },
          onItemChange(idx) {
-             let opt = this.inventoryOptions.find(i => i.id == this.items[idx].inventory_item_id);
-             this.items[idx].unit_cost = opt ? opt.unit_cost : 0;
+             let opt = this.inventoryOptions.find(i => Number(i.id) === Number(this.items[idx].inventory_item_id));
+             let cost = opt ? (opt.cost_per_unit ?? opt.unit_cost ?? 0) : 0;
+             this.items[idx].unit_cost = Number(cost) || 0;
              this.items[idx].unit = opt ? opt.unit : '';
          },
+         totalMaterialCost() {
+             return this.items.reduce((acc, row) => {
+                 let q = parseFloat(row.quantity) || 0;
+                 let c = parseFloat(row.unit_cost) || 0;
+                 return acc + (q * c);
+             }, 0);
+         },
          totalBatchCost() {
-             return this.items.reduce((acc, row) => acc + (parseFloat(row.quantity || 0) * parseFloat(row.unit_cost || 0)), 0);
+             return this.totalMaterialCost() + (parseFloat(this.packagingCost) || 0) + (parseFloat(this.additionalCost) || 0);
          },
          hppPerPortion() {
              let y = parseFloat(this.yieldVal || 1);
@@ -69,7 +80,7 @@
                     <option value="">Standar / Base</option>
                     @foreach($products as $p)
                         @foreach($p->variants as $v)
-                            <option value="{{ $v->id }}" @selected(old('variant_id', $recipe->variant_id) == $v->id)>
+                            <option value="{{ $v->id }}" @selected(old('variant_id', $recipe->product_variant_id ?? $recipe->variant_id) == $v->id)>
                                 {{ $p->name }} — {{ $v->name }}
                             </option>
                         @endforeach
@@ -79,6 +90,19 @@
             <div>
                 <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Hasil Resep (Porsi)</label>
                 <input type="number" step="0.01" min="0.1" name="yield" x-model="yieldVal" required class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm font-bold">
+            </div>
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+                <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Biaya Kemasan per Batch (Rp)</label>
+                <input type="number" step="1" min="0" name="packaging_cost" x-model.number="packagingCost" placeholder="0" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm font-semibold">
+                <p class="mt-1 text-xs text-slate-400">Contoh: kotak mika, plastik vacuum, kantong kresek</p>
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Biaya Tenaga & Gas per Batch (Rp)</label>
+                <input type="number" step="1" min="0" name="additional_cost" x-model.number="additionalCost" placeholder="0" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm font-semibold">
+                <p class="mt-1 text-xs text-slate-400">Contoh: gas LPG, tenaga masak, listrik penggorengan</p>
             </div>
         </div>
 
@@ -99,7 +123,7 @@
                             <select :name="'items['+idx+'][inventory_item_id]'" x-model="row.inventory_item_id" @change="onItemChange(idx)" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
                                 <option value="">Pilih Bahan...</option>
                                 <template x-for="opt in inventoryOptions" :key="opt.id">
-                                    <option :value="opt.id" :selected="opt.id == row.inventory_item_id" x-text="opt.name + ' (' + opt.unit + ') - Rp ' + Number(opt.unit_cost).toLocaleString('id-ID')"></option>
+                                    <option :value="opt.id" :selected="opt.id == row.inventory_item_id" x-text="opt.name + ' (' + opt.unit + ') - Rp ' + Number(opt.cost_per_unit || opt.unit_cost || 0).toLocaleString('id-ID')"></option>
                                 </template>
                             </select>
                         </div>
@@ -119,12 +143,16 @@
         </div>
 
         {{-- Live Cost Preview --}}
-        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 grid gap-4 sm:grid-cols-3">
             <div>
-                <p class="text-xs font-semibold text-emerald-800">Total Biaya Komposisi Batch:</p>
-                <p class="text-lg font-bold text-emerald-900 font-mono">Rp <span x-text="Number(totalBatchCost()).toLocaleString('id-ID')"></span></p>
+                <p class="text-xs font-semibold text-emerald-800">Biaya Bahan Baku:</p>
+                <p class="text-base font-bold text-emerald-900 font-mono">Rp <span x-text="Number(totalMaterialCost().toFixed(0)).toLocaleString('id-ID')"></span></p>
             </div>
-            <div class="text-right">
+            <div>
+                <p class="text-xs font-semibold text-emerald-800">Total Biaya Batch (+ Kemasan/Gas):</p>
+                <p class="text-base font-bold text-emerald-900 font-mono">Rp <span x-text="Number(totalBatchCost().toFixed(0)).toLocaleString('id-ID')"></span></p>
+            </div>
+            <div class="sm:text-right">
                 <p class="text-xs font-semibold text-emerald-800">Estimasi HPP Bersih per Porsi:</p>
                 <p class="text-2xl font-black text-emerald-700 font-mono">Rp <span x-text="Number(hppPerPortion().toFixed(0)).toLocaleString('id-ID')"></span></p>
             </div>
@@ -132,7 +160,7 @@
 
         <div>
             <label class="mb-1 block text-sm font-semibold text-[var(--color-ink)]">Petunjuk Pembuatan / Instruksi SOP</label>
-            <textarea name="instructions" rows="3" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">{{ old('instructions', $recipe->instructions) }}</textarea>
+            <textarea name="instructions" rows="3" class="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm">{{ old('instructions', $recipe->notes ?? $recipe->instructions) }}</textarea>
         </div>
 
         <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">

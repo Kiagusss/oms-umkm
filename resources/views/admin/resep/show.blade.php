@@ -60,15 +60,16 @@
             <tbody class="divide-y divide-slate-100 text-slate-700 text-sm">
                 @foreach($recipe->items as $item)
                     @php
-                        $cost = $item->quantity * ($item->inventoryItem?->unit_cost ?? 0);
+                        $unitCost = (float) ($item->inventoryItem?->cost_per_unit ?? $item->inventoryItem?->unit_cost ?? $item->cost_per_unit ?? 0);
+                        $cost = $item->quantity * $unitCost;
                         $perPortionQty = $recipe->yield > 0 ? $item->quantity / $recipe->yield : 0;
                     @endphp
                     <tr>
                         <td class="py-3.5 px-4 font-semibold text-slate-800">{{ $item->inventoryItem?->name ?? 'Bahan #' . $item->inventory_item_id }}</td>
                         <td class="py-3.5 px-4 text-xs capitalize text-slate-500">{{ str_replace('_', ' ', $item->inventoryItem?->category ?? '') }}</td>
-                        <td class="py-3.5 px-4 tabular-nums">{{ number_format($item->quantity, 3, ',', '.') }} {{ $item->inventoryItem?->unit }}</td>
-                        <td class="py-3.5 px-4 tabular-nums text-xs text-slate-500">{{ number_format($perPortionQty, 3, ',', '.') }} {{ $item->inventoryItem?->unit }}</td>
-                        <td class="py-3.5 px-4 tabular-nums text-xs">Rp {{ number_format($item->inventoryItem?->unit_cost ?? 0, 0, ',', '.') }} / {{ $item->inventoryItem?->unit }}</td>
+                        <td class="py-3.5 px-4 tabular-nums">{{ number_format($item->quantity, 3, ',', '.') }} {{ $item->inventoryItem?->unit ?? $item->unit }}</td>
+                        <td class="py-3.5 px-4 tabular-nums text-xs text-slate-500">{{ number_format($perPortionQty, 3, ',', '.') }} {{ $item->inventoryItem?->unit ?? $item->unit }}</td>
+                        <td class="py-3.5 px-4 tabular-nums text-xs">Rp {{ number_format($unitCost, 0, ',', '.') }} / {{ $item->inventoryItem?->unit ?? $item->unit }}</td>
                         <td class="py-3.5 px-4 tabular-nums font-semibold text-right text-slate-900">Rp {{ number_format($cost, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
@@ -82,10 +83,10 @@
         </table>
     </div>
 
-    @if($recipe->instructions)
+    @if($recipe->notes ?? $recipe->instructions)
         <div class="mt-6 rounded-xl bg-slate-50 p-4">
             <h4 class="text-xs font-bold text-slate-600 uppercase">Petunjuk SOP Pembuatan:</h4>
-            <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">{{ $recipe->instructions }}</p>
+            <p class="mt-1 text-sm text-slate-700 whitespace-pre-line">{{ $recipe->notes ?? $recipe->instructions }}</p>
         </div>
     @endif
 </div>

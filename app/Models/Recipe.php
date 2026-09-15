@@ -26,6 +26,26 @@ class Recipe extends Model
         'total_hpp' => 'integer',
     ];
 
+    protected $appends = [
+        'calculated_cost',
+        'yield',
+    ];
+
+    public function getCalculatedCostAttribute(): int
+    {
+        return (int) ($this->total_hpp ?? 0);
+    }
+
+    public function getYieldAttribute(): float
+    {
+        return 1.0;
+    }
+
+    public function getVariantAttribute(): ?ProductVariant
+    {
+        return $this->productVariant;
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

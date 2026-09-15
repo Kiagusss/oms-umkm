@@ -34,32 +34,54 @@ class RecipeController extends Controller
         $validated = $request->validate([
             'product_id'         => 'required|exists:products,id',
             'product_variant_id' => 'nullable|exists:product_variants,id',
-            'yield_quantity'     => 'required|numeric|min:0.01',
+            'variant_id'         => 'nullable|exists:product_variants,id',
+            'packaging_cost'     => 'nullable|numeric|min:0',
+            'additional_cost'    => 'nullable|numeric|min:0',
             'labor_cost'         => 'nullable|numeric|min:0',
             'overhead_cost'      => 'nullable|numeric|min:0',
+            'instructions'       => 'nullable|string',
             'notes'              => 'nullable|string',
             'items'              => 'required|array|min:1',
             'items.*.inventory_item_id' => 'required|exists:inventory_items,id',
             'items.*.quantity'   => 'required|numeric|min:0.0001',
-            'items.*.item_type'  => 'required|in:ingredient,packaging,other',
         ]);
 
-        $recipe = DB::transaction(function () use ($validated) {
+        $variantId = $validated['product_variant_id'] ?? $validated['variant_id'] ?? null;
+        $product = Product::findOrFail($validated['product_id']);
+        $recipeName = 'Resep ' . $product->name;
+        if ($variantId) {
+            $variant = ProductVariant::find($variantId);
+            if ($variant) {
+                $recipeName .= ' (' . $variant->name . ')';
+            }
+        }
+
+        $packagingCost = (int) ($validated['packaging_cost'] ?? 0);
+        $additionalCost = (int) ($validated['additional_cost'] ?? (($validated['labor_cost'] ?? 0) + ($validated['overhead_cost'] ?? 0)));
+        $notes = $validated['notes'] ?? $validated['instructions'] ?? null;
+
+        $recipe = DB::transaction(function () use ($validated, $product, $variantId, $recipeName, $packagingCost, $additionalCost, $notes) {
             $recipe = Recipe::create([
-                'product_id'         => $validated['product_id'],
-                'product_variant_id' => $validated['product_variant_id'] ?? null,
-                'yield_quantity'     => $validated['yield_quantity'],
-                'labor_cost'         => $validated['labor_cost'] ?? 0,
-                'overhead_cost'      => $validated['overhead_cost'] ?? 0,
-                'notes'              => $validated['notes'] ?? null,
+                'product_id'         => $product->id,
+                'product_variant_id' => $variantId,
+                'name'               => $recipeName,
+                'packaging_cost'     => $packagingCost,
+                'additional_cost'    => $additionalCost,
+                'notes'              => $notes,
             ]);
 
             foreach ($validated['items'] as $item) {
+                $invItem = InventoryItem::find($item['inventory_item_id']);
+                $costPerUnit = $invItem ? (int) $invItem->cost_per_unit : 0;
+                $qty = (float) $item['quantity'];
+
                 RecipeItem::create([
                     'recipe_id'         => $recipe->id,
                     'inventory_item_id' => $item['inventory_item_id'],
-                    'quantity'          => $item['quantity'],
-                    'item_type'         => $item['item_type'],
+                    'quantity'          => $qty,
+                    'unit'              => $invItem?->unit ?? 'unit',
+                    'cost_per_unit'     => $costPerUnit,
+                    'subtotal'          => (int) round($qty * $costPerUnit),
                 ]);
             }
 
@@ -89,31 +111,62 @@ class RecipeController extends Controller
     public function update(Request $request, Recipe $resep)
     {
         $validated = $request->validate([
-            'yield_quantity'     => 'required|numeric|min:0.01',
+            'product_id'         => 'sometimes|required|exists:products,id',
+            'product_variant_id' => 'nullable|exists:product_variants,id',
+            'variant_id'         => 'nullable|exists:product_variants,id',
+            'packaging_cost'     => 'nullable|numeric|min:0',
+            'additional_cost'    => 'nullable|numeric|min:0',
             'labor_cost'         => 'nullable|numeric|min:0',
             'overhead_cost'      => 'nullable|numeric|min:0',
+            'instructions'       => 'nullable|string',
             'notes'              => 'nullable|string',
             'items'              => 'required|array|min:1',
             'items.*.inventory_item_id' => 'required|exists:inventory_items,id',
             'items.*.quantity'   => 'required|numeric|min:0.0001',
-            'items.*.item_type'  => 'required|in:ingredient,packaging,other',
         ]);
 
-        DB::transaction(function () use ($validated, $resep) {
+        $productId = $validated['product_id'] ?? $resep->product_id;
+        $variantId = $validated['product_variant_id'] ?? $validated['variant_id'] ?? $resep->product_variant_id;
+        $product = Product::findOrFail($productId);
+        $recipeName = 'Resep ' . $product->name;
+        if ($variantId) {
+            $variant = ProductVariant::find($variantId);
+            if ($variant) {
+                $recipeName .= ' (' . $variant->name . ')';
+            }
+        }
+
+        $packagingCost = isset($validated['packaging_cost']) ? (int) $validated['packaging_cost'] : (int) $resep->packaging_cost;
+        $additionalCost = isset($validated['additional_cost']) 
+            ? (int) $validated['additional_cost'] 
+            : (isset($validated['labor_cost']) || isset($validated['overhead_cost']) 
+                ? (int) (($validated['labor_cost'] ?? 0) + ($validated['overhead_cost'] ?? 0)) 
+                : (int) $resep->additional_cost);
+        $notes = $validated['notes'] ?? $validated['instructions'] ?? $resep->notes;
+
+        DB::transaction(function () use ($validated, $resep, $productId, $variantId, $recipeName, $packagingCost, $additionalCost, $notes) {
             $resep->update([
-                'yield_quantity' => $validated['yield_quantity'],
-                'labor_cost'     => $validated['labor_cost'] ?? 0,
-                'overhead_cost'  => $validated['overhead_cost'] ?? 0,
-                'notes'          => $validated['notes'] ?? null,
+                'product_id'         => $productId,
+                'product_variant_id' => $variantId,
+                'name'               => $recipeName,
+                'packaging_cost'     => $packagingCost,
+                'additional_cost'    => $additionalCost,
+                'notes'              => $notes,
             ]);
 
             $resep->items()->delete();
             foreach ($validated['items'] as $item) {
+                $invItem = InventoryItem::find($item['inventory_item_id']);
+                $costPerUnit = $invItem ? (int) $invItem->cost_per_unit : 0;
+                $qty = (float) $item['quantity'];
+
                 RecipeItem::create([
                     'recipe_id'         => $resep->id,
                     'inventory_item_id' => $item['inventory_item_id'],
-                    'quantity'          => $item['quantity'],
-                    'item_type'         => $item['item_type'],
+                    'quantity'          => $qty,
+                    'unit'              => $invItem?->unit ?? 'unit',
+                    'cost_per_unit'     => $costPerUnit,
+                    'subtotal'          => (int) round($qty * $costPerUnit),
                 ]);
             }
 

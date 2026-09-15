@@ -23,6 +23,15 @@ class InventoryItem extends Model
         'minimum_stock' => 'decimal:2',
     ];
 
+    protected $appends = [
+        'unit_cost',
+    ];
+
+    public function getUnitCostAttribute(): int
+    {
+        return (int) ($this->cost_per_unit ?? 0);
+    }
+
     public function branchInventories(): HasMany
     {
         return $this->hasMany(BranchInventory::class);
