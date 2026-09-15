@@ -12,7 +12,7 @@
 
 @php
     $initialItems = $recipe->items->map(function ($it) {
-        $cost = (float) ($it->inventoryItem?->cost_per_unit ?? $it->inventoryItem?->unit_cost ?? $it->cost_per_unit ?? 0);
+        $cost = (float) ($it->inventoryItem?->cost_per_unit ?? $it->cost_per_unit ?? 0);
         return [
             'inventory_item_id' => (int) $it->inventory_item_id,
             'quantity' => (float) $it->quantity,
@@ -31,8 +31,22 @@
          items: {{ json_encode($initialItems) }},
          inventoryOptions: {{ json_encode($inventoryItems) }},
          yieldVal: {{ (float) ($recipe->yield ?: 1) }},
-         packagingCost: {{ (int) ($recipe->packaging_cost ?? 0) }},
-         additionalCost: {{ (int) ($recipe->additional_cost ?? 0) }},
+         packagingCost: {{ (int) ($recipe->packaging_cost ?? 1500) }},
+         additionalCost: {{ (int) ($recipe->additional_cost ?? 1500) }},
+         init() {
+             this.items.forEach((row, idx) => {
+                 this.syncItem(idx);
+             });
+         },
+         syncItem(idx) {
+             let row = this.items[idx];
+             if (!row) return;
+             let opt = this.inventoryOptions.find(i => Number(i.id) === Number(row.inventory_item_id));
+             if (opt) {
+                 row.unit_cost = Number(opt.cost_per_unit ?? opt.unit_cost ?? 0);
+                 row.unit = opt.unit;
+             }
+         },
          addItem() {
              this.items.push({ inventory_item_id: '', quantity: 1, unit_cost: 0, unit: '' });
          },
@@ -42,10 +56,7 @@
              }
          },
          onItemChange(idx) {
-             let opt = this.inventoryOptions.find(i => Number(i.id) === Number(this.items[idx].inventory_item_id));
-             let cost = opt ? (opt.cost_per_unit ?? opt.unit_cost ?? 0) : 0;
-             this.items[idx].unit_cost = Number(cost) || 0;
-             this.items[idx].unit = opt ? opt.unit : '';
+             this.syncItem(idx);
          },
          totalMaterialCost() {
              return this.items.reduce((acc, row) => {
@@ -122,16 +133,20 @@
                         <div class="flex-1 min-w-[200px]">
                             <select :name="'items['+idx+'][inventory_item_id]'" x-model="row.inventory_item_id" @change="onItemChange(idx)" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
                                 <option value="">Pilih Bahan...</option>
-                                <template x-for="opt in inventoryOptions" :key="opt.id">
-                                    <option :value="opt.id" :selected="opt.id == row.inventory_item_id" x-text="opt.name + ' (' + opt.unit + ') - Rp ' + Number(opt.cost_per_unit || opt.unit_cost || 0).toLocaleString('id-ID')"></option>
-                                </template>
+                                @foreach($inventoryItems as $opt)
+                                    <option value="{{ $opt->id }}">
+                                        {{ $opt->name }} ({{ $opt->unit }}) - Rp {{ number_format($opt->cost_per_unit, 0, ',', '.') }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="w-32">
                             <input type="number" step="0.001" min="0.0001" :name="'items['+idx+'][quantity]'" x-model="row.quantity" placeholder="Takaran" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
                         </div>
-                        <div class="w-20 text-xs font-semibold text-slate-500" x-text="row.unit"></div>
-                        <div class="w-36 text-right font-mono text-xs font-semibold text-slate-700">
+                        <div class="w-28 text-xs font-mono font-medium text-slate-500">
+                            @ Rp <span x-text="Number(row.unit_cost || 0).toLocaleString('id-ID')"></span>/<span x-text="row.unit"></span>
+                        </div>
+                        <div class="w-36 text-right font-mono text-sm font-bold text-slate-800">
                             Rp <span x-text="Number((row.quantity || 0) * (row.unit_cost || 0)).toLocaleString('id-ID')"></span>
                         </div>
                         <button type="button" @click="removeItem(idx)" class="text-rose-500 hover:text-rose-700 p-1" title="Hapus bahan">

@@ -205,12 +205,12 @@ class OmsManagementSeeder extends Seeder
 
         // 5. Raw Materials (Inventory Items)
         $items = [
-            ['sku' => 'RAW-IKAN', 'name' => 'Daging Ikan Tenggiri Giling', 'item_type' => 'raw_material', 'unit' => 'g', 'cost_per_unit' => 50, 'minimum_stock' => 5000],
-            ['sku' => 'RAW-SAGU', 'name' => 'Tepung Sagu Tani', 'item_type' => 'raw_material', 'unit' => 'g', 'cost_per_unit' => 15, 'minimum_stock' => 5000],
+            ['sku' => 'RAW-IKAN', 'name' => 'Daging Ikan Tenggiri Giling', 'item_type' => 'raw_material', 'unit' => 'g', 'cost_per_unit' => 100, 'minimum_stock' => 5000],
+            ['sku' => 'RAW-SAGU', 'name' => 'Tepung Sagu Tani', 'item_type' => 'raw_material', 'unit' => 'g', 'cost_per_unit' => 40, 'minimum_stock' => 5000],
             ['sku' => 'RAW-TELUR', 'name' => 'Telur Ayam', 'item_type' => 'raw_material', 'unit' => 'unit', 'cost_per_unit' => 2000, 'minimum_stock' => 50],
             ['sku' => 'RAW-MINYAK', 'name' => 'Minyak Goreng Sawit', 'item_type' => 'raw_material', 'unit' => 'ml', 'cost_per_unit' => 18, 'minimum_stock' => 2000],
-            ['sku' => 'RAW-CUKO', 'name' => 'Cuko Pempek Asli', 'item_type' => 'raw_material', 'unit' => 'ml', 'cost_per_unit' => 25, 'minimum_stock' => 3000],
-            ['sku' => 'PKG-KOTAK', 'name' => 'Kotak Mika + Plastik Vacuum', 'item_type' => 'packaging', 'unit' => 'unit', 'cost_per_unit' => 1200, 'minimum_stock' => 100],
+            ['sku' => 'RAW-CUKO', 'name' => 'Cuko Pempek Asli', 'item_type' => 'raw_material', 'unit' => 'ml', 'cost_per_unit' => 30, 'minimum_stock' => 3000],
+            ['sku' => 'PKG-KOTAK', 'name' => 'Kotak Mika + Plastik Vacuum', 'item_type' => 'packaging', 'unit' => 'unit', 'cost_per_unit' => 1500, 'minimum_stock' => 100],
         ];
 
         $invItems = [];
