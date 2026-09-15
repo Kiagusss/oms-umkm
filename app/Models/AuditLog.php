@@ -44,4 +44,21 @@ class AuditLog extends Model
             'created_at' => now(),
         ]);
     }
+
+    public static function log($user, string $action, string $description, ?Model $model = null): self
+    {
+        $userId = is_numeric($user) ? $user : ($user?->id ?? auth()->id());
+        $auditableType = $model ? get_class($model) : ($user && is_object($user) ? get_class($user) : 'system');
+        $auditableId = $model ? $model->getKey() : ($userId ?? null);
+
+        return self::create([
+            'user_id' => $userId,
+            'action' => $action,
+            'auditable_type' => $auditableType,
+            'auditable_id' => $auditableId,
+            'new_values' => ['description' => $description],
+            'ip_address' => request()->ip(),
+            'created_at' => now(),
+        ]);
+    }
 }

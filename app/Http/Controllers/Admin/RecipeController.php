@@ -17,7 +17,7 @@ class RecipeController extends Controller
 {
     public function index()
     {
-        $recipes = Recipe::with(['product', 'productVariant', 'items.inventoryItem'])->get();
+        $recipes = Recipe::with(['product', 'productVariant', 'items.inventoryItem'])->paginate(15);
         return view('admin.resep.index', compact('recipes'));
     }
 

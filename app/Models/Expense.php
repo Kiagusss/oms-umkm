@@ -21,6 +21,11 @@ class Expense extends Model
         'Lainnya',
     ];
 
+    public static function categories(): array
+    {
+        return self::CATEGORIES;
+    }
+
     protected $fillable = [
         'branch_id',
         'expense_number',

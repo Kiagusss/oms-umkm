@@ -11,7 +11,7 @@ class BranchController extends Controller
 {
     public function index()
     {
-        $branches = Branch::withCount(['orders', 'inventories', 'users'])->get();
+        $branches = Branch::withCount(['orders', 'inventories', 'users'])->paginate(15);
         $selectedBranchId = session('selected_branch_id');
 
         return view('admin.cabang.index', compact('branches', 'selectedBranchId'));
