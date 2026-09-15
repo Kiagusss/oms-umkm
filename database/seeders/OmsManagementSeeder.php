@@ -242,14 +242,14 @@ class OmsManagementSeeder extends Seeder
             );
 
             // Add sample recipe if Kapal Selam or Lenjer
-            if (str_contains(strtolower($prod->name), 'kapal selam')) {
+            if (str_contains(strtolower($prod->name), 'kapal selam') || str_contains(strtolower($prod->name), 'lenjer')) {
                 $prod->update(['has_variants' => true]);
 
                 // Create variants: Regular & Jumbo
                 $vRegular = ProductVariant::firstOrCreate(
                     ['product_id' => $prod->id, 'name' => 'Regular'],
                     [
-                        'sku' => 'PKS-REG',
+                        'sku' => 'PL-REG',
                         'price' => (int) $prod->price,
                         'cost_price' => 8950,
                         'stock' => 25,
@@ -260,7 +260,7 @@ class OmsManagementSeeder extends Seeder
                 $vJumbo = ProductVariant::firstOrCreate(
                     ['product_id' => $prod->id, 'name' => 'Jumbo'],
                     [
-                        'sku' => 'PKS-JMB',
+                        'sku' => 'PL-JMB',
                         'price' => (int) ($prod->price * 1.5),
                         'cost_price' => 13450,
                         'stock' => 15,
@@ -269,6 +269,14 @@ class OmsManagementSeeder extends Seeder
                 );
 
                 // Branch stock for variants: Depok = 20, Jakarta = 5
+                BranchInventory::firstOrCreate(
+                    ['branch_id' => $depok->id, 'product_id' => $prod->id, 'product_variant_id' => $vRegular->id],
+                    ['quantity' => 20, 'minimum_stock' => 5]
+                );
+                BranchInventory::firstOrCreate(
+                    ['branch_id' => $jakarta->id, 'product_id' => $prod->id, 'product_variant_id' => $vRegular->id],
+                    ['quantity' => 5, 'minimum_stock' => 5]
+                );
                 BranchInventory::firstOrCreate(
                     ['branch_id' => $depok->id, 'product_id' => $prod->id, 'product_variant_id' => $vJumbo->id],
                     ['quantity' => 20, 'minimum_stock' => 5]
