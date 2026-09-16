@@ -13,6 +13,7 @@ class User extends Authenticatable
     use HasConversations, HasFactory;
 
     protected $fillable = [
+        'store_id',
         'name',
         'email',
         'password',
@@ -30,6 +31,26 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
     ];
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function stores(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Store::class, 'store_members')->withPivot('role', 'status')->withTimestamps();
+    }
+
+    public function ownedStores(): HasMany
+    {
+        return $this->hasMany(Store::class, 'owner_id');
+    }
+
+    public function isPlatformAdmin(): bool
+    {
+        return $this->hasRole(['admin_platform', 'superadmin']) || ($this->isOwner() && $this->email === 'admin@umkm.local');
+    }
 
     public function role(): BelongsTo
     {

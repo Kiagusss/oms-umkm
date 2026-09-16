@@ -22,17 +22,24 @@ use App\Http\Controllers\Admin\StockTransferController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\CatalogImportController;
+use App\Http\Controllers\Admin\PlatformController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\ArticleController as PublicArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\PublicCategoryController;
 use App\Http\Controllers\PublicOrderController;
 use App\Http\Controllers\PublicProductController;
 use Illuminate\Support\Facades\Route;
 
-// ─── Landing ──────────────────────────────────────────────
+// ─── Landing & Marketplace ────────────────────────────────
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/search', [MarketplaceController::class, 'search'])->name('marketplace.search');
+Route::get('/stores', [MarketplaceController::class, 'stores'])->name('marketplace.stores');
+Route::get('/store/{slug}', [MarketplaceController::class, 'storefront'])->name('marketplace.storefront');
+Route::get('/store/{storeSlug}/produk/{productSlug}', [MarketplaceController::class, 'storeProduct'])->name('marketplace.product');
 Route::get('/artikel', [PublicArticleController::class, 'index'])->name('artikel.index');
 Route::get('/artikel/{slug}', [PublicArticleController::class, 'show'])->name('artikel.show');
 Route::get('/produk/{slug}', [PublicProductController::class, 'show'])->name('produk.show');
@@ -110,6 +117,20 @@ Route::prefix('admin')->group(function () {
         // Financial Reports & Analytics
         Route::get('laporan/keuangan', [FinancialReportController::class, 'index'])->name('admin.laporan.keuangan')->middleware('permission:report.view');
         Route::get('laporan/keuangan/export', [FinancialReportController::class, 'exportCsv'])->name('admin.laporan.keuangan.export')->middleware('permission:report.view');
+
+        // Catalog Import & Migration Engine
+        Route::get('import', [CatalogImportController::class, 'index'])->name('admin.import.index');
+        Route::post('import/validate', [CatalogImportController::class, 'validateSource'])->name('admin.import.validate');
+        Route::post('import/preview', [CatalogImportController::class, 'preview'])->name('admin.import.preview');
+        Route::post('import/execute', [CatalogImportController::class, 'execute'])->name('admin.import.execute');
+        Route::get('imports', [CatalogImportController::class, 'history'])->name('admin.import.history');
+        Route::get('import/{id}', [CatalogImportController::class, 'show'])->name('admin.import.show');
+
+        // Platform & Store Tenant Management
+        Route::get('platform', [PlatformController::class, 'index'])->name('admin.platform.index');
+        Route::post('platform/stores', [PlatformController::class, 'store'])->name('admin.platform.store');
+        Route::post('platform/switch', [PlatformController::class, 'switchStore'])->name('admin.platform.switch');
+        Route::post('platform/stores/{store}/toggle', [PlatformController::class, 'toggleStatus'])->name('admin.platform.toggle');
 
         // AI assistant (Laravel AI SDK) — hanya untuk admin login.
         // Form/UI pengelolaan ada di resources/views/admin/ai/.

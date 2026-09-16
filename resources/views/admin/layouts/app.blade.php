@@ -59,6 +59,12 @@
             ['label' => 'AI Assistant', 'route' => 'admin.ai', 'icon' => 'M12 2a10 10 0 100 20 10 10 0 000-20zm-1 15h2v2h-2zm1.6-9.5c1 .3 1.7 1.1 1.7 2.2 0 1.2-.7 1.8-1.7 2.3-.7.4-.9.7-.9 1.4V14h-1.4v-.7c0-1.1.5-1.7 1.5-2.2.8-.4 1.1-.7 1.1-1.4 0-.6-.4-1-1.2-1-.7 0-1.2.3-1.4 1L9.7 9.4C10.1 8.3 11.2 7.5 12.6 7.5z'],
         ];
 
+        $menuPlatform = [
+            ['label' => 'Import Katalog', 'route' => 'admin.import.index', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'],
+            ['label' => 'Riwayat Import', 'route' => 'admin.import.history', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label' => 'Platform UMKM', 'route' => 'admin.platform.index', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+        ];
+
         $current = request()->route()?->getName() ?? '';
 
         $isActiveFn = function($itemRoute) use ($current) {
@@ -84,6 +90,9 @@
                 'admin.transfer.index' => 'admin.transfer',
                 'admin.pengguna.index' => 'admin.pengguna',
                 'admin.laporan.keuangan' => 'admin.laporan',
+                'admin.import.index' => 'admin.import',
+                'admin.import.history' => 'admin.import.history',
+                'admin.platform.stores' => 'admin.platform',
                 default => null,
             };
             return $prefix ? str_starts_with($current, $prefix) : false;
@@ -167,6 +176,25 @@
                         @endforeach
                     </ul>
                 </div>
+
+                {{-- PLATFORM & MULTI-TENANT Section --}}
+                <div class="mb-6">
+                    <p class="px-4 text-[11px] font-bold tracking-wider text-emerald-600 uppercase">Multi-Tenant & Import</p>
+                    <ul class="mt-2 space-y-1">
+                        @foreach($menuPlatform as $item)
+                            @php $active = $isActiveFn($item['route']); @endphp
+                            <li>
+                                <a href="{{ route($item['route']) }}"
+                                   class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all {{ $active ? 'bg-emerald-50/70 text-emerald-800 border-l-4 border-emerald-700 pl-3' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 {{ $active ? 'text-emerald-700' : 'text-slate-400 group-hover:text-slate-500' }}">
+                                        <path d="{{ $item['icon'] }}" />
+                                    </svg>
+                                    <span>{{ $item['label'] }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             </nav>
 
             {{-- Download App Card & Logout --}}
@@ -233,6 +261,27 @@
 
                 {{-- Right utility bar --}}
                 <div class="flex items-center gap-3">
+                    {{-- Store Switcher (Multi-Tenant) --}}
+                    @php 
+                        $platformStores = \App\Models\Store::where('is_active', true)->orderBy('name')->get(); 
+                        $activeStoreId = session('selected_store_id') ?? ($currentStore->id ?? ($platformStores->first()?->id ?? 1));
+                    @endphp
+                    @if($platformStores->isNotEmpty())
+                        <form method="POST" action="{{ route('admin.platform.switch') }}" class="flex items-center">
+                            @csrf
+                            <div class="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50/90 px-3 py-1.5 text-xs text-emerald-800 shadow-xs">
+                                <span class="text-xs">🏪</span>
+                                <select name="store_id" onchange="this.form.submit()" class="bg-transparent border-0 text-xs font-bold text-emerald-950 cursor-pointer outline-none pr-1">
+                                    @foreach($platformStores as $st)
+                                        <option value="{{ $st->id }}" {{ $activeStoreId == $st->id ? 'selected' : '' }}>
+                                            {{ $st->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </form>
+                    @endif
+
                     {{-- Branch Switcher --}}
                     @php $allBranches = \App\Models\Branch::where('is_active', true)->get(); @endphp
                     @if($allBranches->isNotEmpty())
@@ -342,6 +391,24 @@
                                     <li>
                                         <a href="{{ route($item['route']) }}" @click="sidebarOpen = false"
                                            class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold {{ $active ? 'bg-emerald-50/70 text-emerald-800 border-l-4 border-emerald-700 pl-3' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-850' }}">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 {{ $active ? 'text-emerald-700' : 'text-slate-400' }}">
+                                                <path d="{{ $item['icon'] }}" />
+                                            </svg>
+                                            <span>{{ $item['label'] }}</span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="px-4 text-[10px] font-bold tracking-wider text-emerald-600 uppercase">Multi-Tenant & Import</p>
+                            <ul class="mt-2 space-y-1">
+                                @foreach($menuPlatform as $item)
+                                    @php $active = $isActiveFn($item['route']); @endphp
+                                    <li>
+                                        <a href="{{ route($item['route']) }}" @click="sidebarOpen = false"
+                                           class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold {{ $active ? 'bg-emerald-50/70 text-emerald-800 border-l-4 border-emerald-700 pl-3' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-850' }}">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 {{ $active ? 'text-emerald-700' : 'text-slate-400' }}">
                                                 <path d="{{ $item['icon'] }}" />
                                             </svg>

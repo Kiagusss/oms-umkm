@@ -1,14 +1,15 @@
 <?php
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToStore;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToStore;
 
-    protected $fillable = ['name', 'slug', 'icon', 'ord', 'status'];
+    protected $fillable = ['store_id', 'name', 'slug', 'icon', 'ord', 'status'];
 
     public function products()
     {

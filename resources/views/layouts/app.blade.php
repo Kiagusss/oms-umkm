@@ -83,6 +83,21 @@
                     return this.items.reduce((s, i) => s + i.price * i.quantity, 0);
                 },
                 addItem(item, qty = 1) {
+                    const currentStoreId = item.store_id || item.storeId;
+                    if (this.items.length > 0 && currentStoreId) {
+                        const existingStoreId = this.items[0].store_id || this.items[0].storeId;
+                        if (existingStoreId && existingStoreId !== currentStoreId) {
+                            const storeName = item.store_name || item.storeName || 'toko lain';
+                            const confirmed = confirm(
+                                'Keranjang Anda saat ini berisi produk dari toko yang berbeda.\n\nPesanan UMKM diproses per masing-masing toko.\n\nKosongkan keranjang dan ganti dengan produk dari "' + storeName + '"?'
+                            );
+                            if (!confirmed) {
+                                return;
+                            }
+                            this.items = [];
+                        }
+                    }
+
                     const existing = this.items.find(i => i.id === item.id);
                     if (existing) {
                         existing.quantity = Math.min(existing.quantity + qty, item.stock || 99);

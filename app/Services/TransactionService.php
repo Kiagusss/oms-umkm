@@ -31,6 +31,12 @@ class TransactionService
         $productIds = collect($items)->pluck('id')->unique()->values();
         $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
+        // Single-store order constraint
+        $storeIds = $products->pluck('store_id')->filter()->unique();
+        if ($storeIds->count() > 1) {
+            throw new \InvalidArgumentException("Semua produk dalam satu pesanan harus berasal dari toko yang sama.");
+        }
+
         $variantIds = collect($items)->pluck('variant_id')->filter()->unique()->values();
         $variants = $variantIds->isNotEmpty()
             ? ProductVariant::whereIn('id', $variantIds)->get()->keyBy('id')
@@ -175,7 +181,13 @@ class TransactionService
             $netSales = max(0, $calc['subtotal'] - $discount);
             $grossProfit = $netSales - $totalCogs;
 
+            $orderStoreId = $validated['store_id']
+                ?? Product::find($validated['items'][0]['id'] ?? 0)?->store_id
+                ?? \App\Services\Tenant\TenantContext::getStoreId()
+                ?? \App\Models\Store::defaultStore()?->id;
+
             $order = Order::create([
+                'store_id'         => $orderStoreId,
                 'branch_id'        => $branchId,
                 'name'             => $validated['customer_name'],
                 'whatsapp'         => $validated['customer_whatsapp'] ?? '',

@@ -18,12 +18,13 @@
 
         {{-- Desktop links --}}
         <ul class="hidden items-center gap-8 lg:flex">
-            <li><a href="#beranda" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Beranda</a></li>
-            <li><a href="#produk" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Menu</a></li>
-            <li><a href="#tentang" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Tentang</a></li>
-            <li><a href="#testimoni" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Testimoni</a></li>
-            <li><a href="#faq" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">FAQ</a></li>
-            <li><a href="#artikel" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Artikel</a></li>
+            <li><a href="{{ url('/') }}" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Beranda</a></li>
+            <li><a href="{{ route('marketplace.stores') }}" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Toko UMKM</a></li>
+            <li><a href="{{ route('marketplace.search') }}" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Cari Produk</a></li>
+            <li><a href="{{ url('/#produk') }}" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Menu</a></li>
+            <li><a href="{{ url('/#testimoni') }}" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Testimoni</a></li>
+            <li><a href="{{ url('/#faq') }}" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">FAQ</a></li>
+            <li><a href="{{ route('artikel.index') }}" class="text-sm font-medium text-[var(--color-ink-2)] transition-colors duration-[var(--dur-normal)] hover:text-[var(--color-ink)]">Artikel</a></li>
         </ul>
 
         {{-- CTA — hard right --}}
@@ -101,12 +102,14 @@
         </div>
         <nav class="px-5 py-6">
             <ul class="space-y-1">
-                <li><a href="#beranda" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Beranda</a></li>
-                <li><a href="#produk" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Menu</a></li>
-                <li><a href="#tentang" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Tentang</a></li>
-                <li><a href="#testimoni" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Testimoni</a></li>
-                <li><a href="#faq" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">FAQ</a></li>
-                <li><a href="#artikel" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Artikel</a></li>
+                <li><a href="{{ url('/') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Beranda</a></li>
+                <li><a href="{{ route('marketplace.stores') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Toko UMKM</a></li>
+                <li><a href="{{ route('marketplace.search') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Cari Produk</a></li>
+                <li><a href="{{ url('/#produk') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Menu</a></li>
+                <li><a href="{{ url('/#tentang') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Tentang</a></li>
+                <li><a href="{{ url('/#testimoni') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Testimoni</a></li>
+                <li><a href="{{ url('/#faq') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">FAQ</a></li>
+                <li><a href="{{ route('artikel.index') }}" @click="mobileOpen = false" class="block rounded-[var(--radius-lg)] px-4 py-3 text-base font-medium text-[var(--color-ink-2)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-ink)]">Artikel</a></li>
             </ul>
             <div class="mt-6 border-t border-[var(--color-paper-3)] pt-6">
                 <a
