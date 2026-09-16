@@ -66,8 +66,9 @@
         <tbody class="divide-y divide-[var(--color-paper-3)] text-[var(--color-ink-2)]" x-data="{ adjustModal: false, selectedItem: null }">
             @forelse($items as $item)
                 @php
-                    $stock = $item->current_stock;
-                    $isLow = $stock <= $item->min_stock;
+                    $stock = (float) ($item->current_stock ?? 0);
+                    $minStock = (float) ($item->min_stock ?? 0);
+                    $isLow = $stock <= $minStock;
                     $isOut = $stock <= 0;
                 @endphp
                 <tr class="hover:bg-[var(--color-paper-2)] transition-colors">
@@ -75,15 +76,15 @@
                     <td class="px-6 py-4 font-semibold text-[var(--color-ink)]">{{ $item->name }}</td>
                     <td class="px-6 py-4">
                         <span class="rounded-lg bg-slate-100 px-2 py-0.5 text-xs text-slate-700 capitalize">
-                            {{ str_replace('_', ' ', $item->category) }}
+                            {{ str_replace('_', ' ', (string) ($item->category ?? 'Umum')) }}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-xs font-medium">{{ $item->unit }}</td>
-                    <td class="px-6 py-4 tabular-nums font-medium text-slate-800">Rp {{ number_format($item->unit_cost, 0, ',', '.') }}</td>
+                    <td class="px-6 py-4 tabular-nums font-medium text-slate-800">Rp {{ number_format((float) ($item->unit_cost ?? 0), 0, ',', '.') }}</td>
                     <td class="px-6 py-4 tabular-nums font-bold {{ $isOut ? 'text-rose-600' : ($isLow ? 'text-amber-600' : 'text-slate-800') }}">
                         {{ number_format($stock, 2, ',', '.') }}
                     </td>
-                    <td class="px-6 py-4 tabular-nums text-xs text-slate-500">{{ number_format($item->min_stock, 2, ',', '.') }}</td>
+                    <td class="px-6 py-4 tabular-nums text-xs text-slate-500">{{ number_format($minStock, 2, ',', '.') }}</td>
                     <td class="px-6 py-4">
                         @if($isOut)
                             <span class="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">Habis</span>

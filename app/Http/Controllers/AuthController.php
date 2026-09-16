@@ -47,6 +47,7 @@ class AuthController extends Controller
                     'admin_authenticated' => true,
                     'admin_user_id'       => $user->id,
                     'selected_branch_id'  => $user->branch_id,
+                    'selected_store_id'   => $user->store_id,
                 ]);
                 $authenticated = true;
             }
@@ -55,13 +56,39 @@ class AuthController extends Controller
             $adminEmail = config('app.admin_email');
             $adminPassword = config('app.admin_password');
 
-            if ($adminEmail && $adminPassword && $credentials['email'] === $adminEmail && Hash::check($credentials['password'], $adminPassword)) {
-                $owner = \App\Models\User::where('email', $adminEmail)->first();
-                if ($owner) {
-                    auth()->login($owner);
-                    session(['admin_user_id' => $owner->id, 'selected_branch_id' => $owner->branch_id]);
+            $passwordMatches = false;
+            if ($adminPassword) {
+                $passwordMatches = Hash::check($credentials['password'], $adminPassword)
+                    || $credentials['password'] === $adminPassword;
+            }
+
+            if ($adminEmail && $credentials['email'] === $adminEmail && $passwordMatches) {
+                $ownerRole = \App\Models\Role::where('name', 'owner')->first();
+                $owner = \App\Models\User::firstOrCreate(
+                    ['email' => $adminEmail],
+                    [
+                        'name' => 'Administrator',
+                        'password' => Hash::make($credentials['password']),
+                        'role_id' => $ownerRole?->id,
+                        'status' => 'active',
+                        'store_id' => \App\Models\Store::defaultStore()?->id,
+                    ]
+                );
+
+                if (!$owner->is_active) {
+                    $owner->update(['status' => 'active']);
                 }
-                session(['admin_authenticated' => true]);
+                if ($ownerRole && $owner->role_id !== $ownerRole->id) {
+                    $owner->update(['role_id' => $ownerRole->id]);
+                }
+
+                auth()->login($owner);
+                session([
+                    'admin_authenticated' => true,
+                    'admin_user_id'       => $owner->id,
+                    'selected_branch_id'  => $owner->branch_id,
+                    'selected_store_id'   => $owner->store_id,
+                ]);
                 $authenticated = true;
             }
         }

@@ -135,6 +135,17 @@ class OmsManagementSeeder extends Seeder
 
         // 3. Default Users
         User::firstOrCreate(
+            ['email' => 'admin@pempek.com'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('admin123'),
+                'role_id' => $roles['owner']->id,
+                'branch_id' => null, // all branches
+                'status' => 'active',
+            ]
+        );
+
+        User::firstOrCreate(
             ['email' => 'owner@pempek.com'],
             [
                 'name' => 'Owner Pempek',
