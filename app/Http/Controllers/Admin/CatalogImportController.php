@@ -41,15 +41,23 @@ class CatalogImportController extends Controller
             'source' => 'nullable|string',
             'url' => 'nullable|string',
             'source_url' => 'nullable|string',
+            'marketplace_url' => 'nullable|string',
             'type' => 'nullable|string|in:mock,marketplace,csv,json,auto',
+            'source_type' => 'nullable|string|in:mock,marketplace,csv,json,auto',
             'file' => 'nullable|file|max:10240',
+            'csv_file' => 'nullable|file|max:10240',
+            'json_file' => 'nullable|file|max:10240',
         ]);
 
-        $source = $request->input('source') ?? $request->input('url') ?? $request->input('source_url');
-        $type = $request->input('type');
+        $source = $request->input('marketplace_url')
+            ?? $request->input('source_url')
+            ?? $request->input('source')
+            ?? $request->input('url');
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
+        $type = $request->input('source_type') ?? $request->input('type');
+
+        $file = $request->file('file') ?? $request->file('csv_file') ?? $request->file('json_file');
+        if ($file) {
             $source = $file->getRealPath();
             $ext = strtolower($file->getClientOriginalExtension());
             $type = in_array($ext, ['csv', 'json']) ? $ext : 'csv';
@@ -62,7 +70,7 @@ class CatalogImportController extends Controller
             ], 422);
         }
 
-        $result = $this->importService->validateSource($source, $type === 'auto' ? null : $type);
+        $result = $this->importService->validateSource(trim((string) $source), $type === 'auto' ? null : $type);
 
         return response()->json($result);
     }
@@ -75,17 +83,24 @@ class CatalogImportController extends Controller
         $request->validate([
             'source' => 'nullable|string',
             'source_url' => 'nullable|string',
+            'marketplace_url' => 'nullable|string',
+            'url' => 'nullable|string',
             'source_type' => 'nullable|string',
             'type' => 'nullable|string',
             'target_store_id' => 'nullable|integer',
             'file' => 'nullable|file|max:10240',
+            'csv_file' => 'nullable|file|max:10240',
+            'json_file' => 'nullable|file|max:10240',
         ]);
 
         $type = $request->input('source_type') ?? $request->input('type') ?? 'mock';
-        $source = $request->input('source_url') ?? $request->input('source');
+        $source = $request->input('marketplace_url')
+            ?? $request->input('source_url')
+            ?? $request->input('source')
+            ?? $request->input('url');
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
+        $file = $request->file('file') ?? $request->file('csv_file') ?? $request->file('json_file');
+        if ($file) {
             $path = $file->store('imports', 'local');
             $source = storage_path('app/' . $path);
             $ext = strtolower($file->getClientOriginalExtension());
@@ -99,6 +114,8 @@ class CatalogImportController extends Controller
         if (empty($source)) {
             return redirect()->route('admin.import.index')->with('error', 'Sumber katalog tidak ditemukan.');
         }
+
+        $source = trim((string) $source);
 
         $targetStoreId = $request->input('target_store_id') ? (int) $request->input('target_store_id') : TenantContext::getStoreId();
         $targetStore = $targetStoreId ? Store::find($targetStoreId) : TenantContext::getStore();
@@ -186,7 +203,7 @@ class CatalogImportController extends Controller
             type: $type,
             duplicateStrategy: $request->input('duplicate_strategy', 'skip'),
             selectedIndexes: $selected,
-            userId: auth()->id()
+            userId: auth()->id() ?? session('admin_user_id')
         );
 
         return redirect()->route('admin.import.show', $import->id)

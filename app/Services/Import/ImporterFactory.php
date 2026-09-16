@@ -42,7 +42,18 @@ class ImporterFactory
                 return new JsonImporter();
             }
 
-            if (str_starts_with($lower, 'http://') || str_starts_with($lower, 'https://')) {
+            if (
+                str_starts_with($lower, 'http://') ||
+                str_starts_with($lower, 'https://') ||
+                str_starts_with($lower, 'www.') ||
+                str_contains($lower, 'shopee.') ||
+                str_contains($lower, 'shp.ee') ||
+                str_contains($lower, 'tokopedia.') ||
+                str_contains($lower, 'lazada.') ||
+                str_contains($lower, 'blibli.') ||
+                str_contains($lower, 'bukalapak.') ||
+                str_contains($lower, 'tiktok.com')
+            ) {
                 return new MarketplaceImporter();
             }
         }

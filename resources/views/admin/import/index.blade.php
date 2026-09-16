@@ -27,6 +27,8 @@
         validationResult: null,
         validateSource() {
             if (this.sourceType !== 'marketplace') return;
+            const url = (this.marketplaceUrl || '').trim();
+            if (!url) return;
             this.validating = true;
             this.validationResult = null;
             fetch('{{ route('admin.import.validate') }}', {
@@ -38,17 +40,28 @@
                 },
                 body: JSON.stringify({
                     source_type: this.sourceType,
-                    marketplace_url: this.marketplaceUrl
+                    type: this.sourceType,
+                    marketplace_url: url,
+                    source_url: url,
+                    source: url,
+                    url: url
                 })
             })
-            .then(res => res.json())
-            .then(data => {
+            .then(async res => {
+                const data = await res.json();
                 this.validating = false;
-                this.validationResult = data;
+                if (!res.ok && !data.valid) {
+                    this.validationResult = {
+                        valid: false,
+                        message: data.message || 'URL ditolak oleh sistem validasi.'
+                    };
+                } else {
+                    this.validationResult = data;
+                }
             })
             .catch(err => {
                 this.validating = false;
-                this.validationResult = { valid: false, message: 'Gagal melakukan validasi URL.' };
+                this.validationResult = { valid: false, message: 'Gagal melakukan validasi URL: ' + err.message };
             });
         }
     }">
@@ -188,10 +201,10 @@
                     <h4 class="text-sm font-bold text-slate-800">Marketplace / Website URL</h4>
                     <div class="flex gap-2">
                         <input
-                            type="url"
+                            type="text"
                             name="marketplace_url"
                             x-model="marketplaceUrl"
-                            placeholder="https://example.com/toko/pempek-palembang"
+                            placeholder="Contoh: https://shopee.co.id/wingsofficialshop atau shopee.co.id/toko"
                             class="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm focus:border-emerald-600 focus:outline-none"
                         >
                         <button

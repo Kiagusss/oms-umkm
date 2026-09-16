@@ -261,4 +261,46 @@ class CatalogImportTest extends TestCase
         $resHistory = $this->get(route('admin.import.history'));
         $resHistory->assertStatus(200);
     }
+
+    public function test_shopee_wings_official_shop_validation_and_preview(): void
+    {
+        // Test 1: Full https URL via validate endpoint
+        $res1 = $this->postJson(route('admin.import.validate'), [
+            'source_type' => 'marketplace',
+            'marketplace_url' => 'https://shopee.co.id/wingsofficialshop',
+        ]);
+        $res1->assertOk();
+        $res1->assertJson([
+            'valid' => true,
+            'type' => 'marketplace',
+        ]);
+        $this->assertStringContainsString('Wings Official Shop', $res1->json('message'));
+
+        // Test 2: URL without scheme (shopee.co.id/wingsofficialshop)
+        $res2 = $this->postJson(route('admin.import.validate'), [
+            'source_type' => 'marketplace',
+            'marketplace_url' => 'shopee.co.id/wingsofficialshop',
+        ]);
+        $res2->assertOk();
+        $res2->assertJson(['valid' => true]);
+
+        // Test 3: Shopee specific product/store slug with ID
+        $res3 = $this->postJson(route('admin.import.validate'), [
+            'source_type' => 'marketplace',
+            'marketplace_url' => 'https://shopee.co.id/Wings-Official-Shop-i.14088921.1293847',
+        ]);
+        $res3->assertOk();
+        $res3->assertJson(['valid' => true]);
+
+        // Test 4: Preview page loads authentic Wings catalog
+        $resPreview = $this->post(route('admin.import.preview'), [
+            'source_type' => 'marketplace',
+            'marketplace_url' => 'https://shopee.co.id/wingsofficialshop',
+            'target_store_id' => $this->store->id,
+        ]);
+        $resPreview->assertStatus(200);
+        $resPreview->assertSee('So Klin Liquid');
+        $resPreview->assertSee('Daia Deterjen');
+        $resPreview->assertSee('Mama Lemon');
+    }
 }
