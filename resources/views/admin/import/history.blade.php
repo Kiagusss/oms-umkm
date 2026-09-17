@@ -11,7 +11,7 @@
             <p class="text-sm text-slate-500">Log dan audit trail seluruh operasi migrasi dan sinkronisasi produk UMKM.</p>
         </div>
         <div>
-            <a href="{{ route('admin.import.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition">
+            <a href="{{ route('admin.import.index') }}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:opacity-95 transition bg-[var(--color-accent,#0f4a2d)]" style="background-color: #0f4a2d !important; color: #ffffff !important;">
                 + Import Katalog Baru
             </a>
         </div>

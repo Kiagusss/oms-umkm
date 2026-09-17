@@ -153,10 +153,11 @@
                 <div class="flex items-center gap-3">
                     <button
                         type="submit"
-                        class="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-800 transition"
+                        class="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-sm hover:opacity-95 transition cursor-pointer bg-[var(--color-accent,#0f4a2d)]"
+                        style="background-color: #0f4a2d !important; color: #ffffff !important;"
                     >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        Eksekusi Import Katalog Sekarang
+                        <span style="color: #ffffff !important; font-weight: 700;">Eksekusi Import Katalog Sekarang</span>
                     </button>
                 </div>
             </div>

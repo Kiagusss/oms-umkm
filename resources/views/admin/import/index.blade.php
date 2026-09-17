@@ -219,8 +219,22 @@
                     </div>
 
                     <div x-show="validationResult" class="text-xs p-3 rounded-xl" :class="validationResult?.valid ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'">
-                        <p class="font-bold" x-text="validationResult?.valid ? '✓ URL Aman & Terverifikasi' : '⚠ URL Ditolak'"></p>
-                        <p class="mt-0.5" x-text="validationResult?.message"></p>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="font-bold" x-text="validationResult?.valid ? '✓ URL Aman & Terverifikasi' : '⚠ URL Ditolak'"></p>
+                                <p class="mt-0.5" x-text="validationResult?.message"></p>
+                            </div>
+                            <template x-if="validationResult?.valid">
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:opacity-90 cursor-pointer shrink-0"
+                                    style="background-color: #0f4a2d !important; color: #ffffff !important;"
+                                >
+                                    <span>Lanjut ke Pratinjau</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                </button>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -229,9 +243,13 @@
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                 <button
                     type="submit"
-                    class="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-800 transition"
+                    class="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-md transition hover:opacity-95 cursor-pointer bg-[var(--color-accent,#0f4a2d)]"
+                    style="background-color: #0f4a2d !important; color: #ffffff !important; min-height: 44px;"
                 >
-                    <span>Lanjut ke Pratinjau & Duplikat Check →</span>
+                    <span style="color: #ffffff !important; font-weight: 700;">Lanjut ke Pratinjau &amp; Cek Duplikat</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-white" style="color: #ffffff !important;">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
                 </button>
             </div>
         </form>
